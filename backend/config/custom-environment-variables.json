@@ -1,0 +1,12 @@
+{
+  "port": {
+    "__name": "PORT",
+    "__format": "number"
+  },
+  "authentication": {
+    "secret": "AUTH_SECRET"
+  },
+  "postgresql": {
+    "connection": "POSTGRESQL_CONNECTION"
+  }
+}

@@ -1,0 +1,30 @@
+version: "3.8"
+name: "${APP_NAME}"
+
+services:
+  postgres:
+    container_name: "${APP_NAME}-db"
+    image: "${POSTGRESQL_IMAGE:-postgres:14-alpine}"
+    environment:
+      POSTGRES_DB: ${APP_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - ~/db/data/${APP_NAME}-postgres:/var/lib/postgresql/data
+
+  server:
+    container_name: "${APP_NAME}-server"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: ${PORT}
+      APP_ENV: production
+      AUTH_SECRET: ${AUTH_SECRET}
+      POSTGRESQL_CONNECTION: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${APP_NAME}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - postgres

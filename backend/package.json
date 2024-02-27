@@ -1,0 +1,83 @@
+{
+  "name": "backend",
+  "description": "",
+  "version": "0.0.0",
+  "homepage": "",
+  "private": true,
+  "keywords": [
+    "feathers"
+  ],
+  "author": {},
+  "contributors": [],
+  "bugs": {},
+  "engines": {
+    "node": ">= 20.11.1"
+  },
+  "feathers": {
+    "language": "ts",
+    "packager": "yarn",
+    "database": "postgresql",
+    "framework": "express",
+    "transports": [
+      "rest",
+      "websockets"
+    ],
+    "schema": "typebox"
+  },
+  "directories": {
+    "build": "src",
+    "test": "test"
+  },
+  "files": [
+    "build/client.js",
+    "build/**/*.d.ts",
+    "build/**/*.shared.js"
+  ],
+  "main": "build/client",
+  "scripts": {
+    "dev": "nodemon -x ts-node src/index.ts",
+    "build": "shx rm -rf build/ && tsc",
+    "start": "node build/",
+    "prettier": "npx prettier \"**/*.ts\" --write",
+    "mocha": "cross-env NODE_ENV=test mocha test/ --require ts-node/register --recursive --extension .ts --exit",
+    "test": "cross-env NODE_ENV=test npm run migrate && npm run mocha",
+    "bundle:client": "npm run build && npm pack --pack-destination ./public",
+    "migrate": "knex migrate:latest",
+    "migrate:make": "knex migrate:make"
+  },
+  "dependencies": {
+    "@feathersjs/adapter-commons": "^5.0.23",
+    "@feathersjs/authentication": "^5.0.23",
+    "@feathersjs/authentication-client": "^5.0.23",
+    "@feathersjs/authentication-local": "^5.0.23",
+    "@feathersjs/authentication-oauth": "^5.0.23",
+    "@feathersjs/configuration": "^5.0.23",
+    "@feathersjs/errors": "^5.0.23",
+    "@feathersjs/express": "^5.0.23",
+    "@feathersjs/feathers": "^5.0.23",
+    "@feathersjs/knex": "^5.0.23",
+    "@feathersjs/schema": "^5.0.23",
+    "@feathersjs/socketio": "^5.0.23",
+    "@feathersjs/transport-commons": "^5.0.23",
+    "@feathersjs/typebox": "^5.0.23",
+    "compression": "^1.7.4",
+    "knex": "^3.1.0",
+    "next": "14.1.0",
+    "pg": "^8.11.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@feathersjs/cli": "5.0.23",
+    "@feathersjs/rest-client": "^5.0.23",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.20",
+    "axios": "^1.6.7",
+    "cross-env": "^7.0.3",
+    "mocha": "^10.3.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
