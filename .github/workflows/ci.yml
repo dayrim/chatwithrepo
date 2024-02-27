@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: dayrim/${{ secrets.APP_NAME }}-web:latest
+          tags: dayrim/chatwithrepo-server:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

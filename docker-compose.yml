@@ -1,10 +1,9 @@
 version: "3.8"
-name: "${APP_NAME}"
 
 services:
   postgres:
     container_name: "${APP_NAME}-db"
-    image: "${POSTGRESQL_IMAGE:-postgres:14-alpine}"
+    image: postgres:16
     environment:
       POSTGRES_DB: ${APP_NAME}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -16,9 +15,7 @@ services:
 
   server:
     container_name: "${APP_NAME}-server"
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: dayrim/chatwithrepo-server:latest
     environment:
       PORT: ${PORT}
       APP_ENV: production
