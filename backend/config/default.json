@@ -1,7 +1,6 @@
 {
   "host": "localhost",
   "port": 3030,
-  "public": "./public/",
   "origins": [
     "http://localhost:3030"
   ],
@@ -25,7 +24,7 @@
       "header": {
         "typ": "access"
       },
-      "audience": "https://yourdomain.com",
+      "audience": "https://chatwithrepo.net",
       "algorithm": "HS256",
       "expiresIn": "1d"
     },
