@@ -4,15 +4,18 @@ FROM node:20
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the rest of the project files into the working directory
+COPY package.json yarn.lock /app/
+COPY backend/package.json ./backend/
+COPY web/package.json ./web/
+
+RUN yarn install --frozen-lockfile
+
+# Copy the rest of your project files into the working directory
 COPY . /app
 
-# Install dependencies
-RUN yarn install
-
-# Build the project (if necessary)
 RUN yarn build
 
-WORKDIR /app/dist
-# The command to run your application
-CMD ["node", "src/index.js"]
+# Adjust the WORKDIR and CMD as needed for your application's entry point
+# For example, to run the backend
+WORKDIR /app/backend
+CMD ["node", "build/index.js"]
