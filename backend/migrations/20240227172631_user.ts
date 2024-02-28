@@ -9,6 +9,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('email').unique()
     table.string('password')
     table.string('githubId')
+    table.string('geminiApiKey')
 
     // Add a 'name' column
     table.string('name')

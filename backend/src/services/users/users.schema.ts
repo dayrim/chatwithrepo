@@ -15,6 +15,7 @@ export const userSchema = Type.Object(
     email: Type.String(),
     password: Type.Optional(Type.String()),
     githubId: Type.Optional(Type.String()),
+    geminiApiKey: Type.Optional(Type.String()),
     name: Type.String(),
     created_at: Type.String({ format: 'date-time' }),
     updated_at: Type.String({ format: 'date-time' })

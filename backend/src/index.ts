@@ -22,6 +22,11 @@ import { services } from './services/index'
 import { channels } from './channels'
 import next from 'next'
 import { IncomingMessage, ServerResponse } from 'http'
+import path from 'path'
+import dotenv from 'dotenv'
+
+// Load dotenv config
+dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 // Initialize Next.js
 const dev = process.env.APP_ENV !== 'production'

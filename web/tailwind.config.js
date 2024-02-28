@@ -6,15 +6,14 @@ module.exports = {
       __dirname,
       "{src,pages,components,app}/**/*!(*.stories|*.spec).{ts,tsx,html}"
     ),
+    join(__dirname, "../node_modules/flowbite-react/lib/esm/**/*.js"),
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      width: {
+        280: "280px",
       },
     },
   },
-  plugins: [],
+  plugins: [require("flowbite/plugin")],
 };

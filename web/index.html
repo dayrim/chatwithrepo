@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1 id="header"></h1>
+
+    <script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
+    <script src="https://unpkg.com/isomorphic-git"></script>
+    <script type="module">
+      import http from "https://unpkg.com/isomorphic-git@beta/http/web/index.js";
+      const fs = new LightningFS("fs");
+      console.log("YO");
+      const dir = "/test-clone";
+      git
+        .clone({
+          fs,
+          http,
+          dir,
+          url: "https://github.com/isomorphic-git/lightning-fs",
+          corsProxy: "https://cors.isomorphic-git.org",
+        })
+        .then(console.log);
+    </script>
+  </body>
+</html>
