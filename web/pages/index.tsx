@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     trackEvent("page.view", { page: "home" });
-  }, []);
+  }, [trackEvent]);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);

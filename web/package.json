@@ -6,7 +6,7 @@
     "web-dev": "next dev",
     "build": "next build",
     "web-start": "next start",
-    "web-lint": "next lint"
+    "lint": "next lint"
   },
   "dependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",

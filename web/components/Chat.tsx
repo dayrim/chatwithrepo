@@ -164,7 +164,7 @@ const Chat = (props: any) => {
                               Ready to Chat with Your Repositories?
                             </h1>
                             <p className="text-md sm:text-lg text-gray-400 dark:text-gray-500 mb-6">
-                              Start by adding a GitHub repository to explore its contents and chat with it. Let's get started!
+                              Start by adding a GitHub repository to explore its contents and chat with it. Let&apos;s get started!
                             </p>
                           </div>
                           <Button
