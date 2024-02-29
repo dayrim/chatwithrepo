@@ -7,11 +7,14 @@ import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
 import AddRepo from "./AddRepo";
+import NoSSR from "@/shared/NoSSR";
+import { Dropdown } from "flowbite-react";
+import useAppState from "@/hooks/useAppStore";
+import RepositoryDropdown from "./RepositoryDropdown";
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
-
-  const [showAddRepo, setShowAddRepo] = useState(false);
+  const { selectedRepository, setShowAddRepo, showAddRepo } = useAppState();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmptyChat, setShowEmptyChat] = useState(true);
@@ -106,7 +109,8 @@ const Chat = (props: any) => {
 
   return (
     <>
-      <AddRepo setOpenModal={setShowAddRepo} openModal={showAddRepo}></AddRepo>
+      <NoSSR><AddRepo setOpenModal={setShowAddRepo} openModal={showAddRepo}></AddRepo></NoSSR>
+
       <div className="flex max-w-full flex-1 flex-col">
         <div className="sticky bg-gray-800 top-0 z-10 flex items-center border-b border-white/20 bg-white-800 pl-1 pt-1 text-gray-200 sm:pl-3 md:hidden">
           <button
@@ -129,7 +133,9 @@ const Chat = (props: any) => {
                 {!showEmptyChat && conversation.length > 0 ? (
                   <div className="flex flex-col items-center text-sm bg-white-800">
                     <div className="flex w-full items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">
-                      Model: {selectedModel.name}
+                      <NoSSR>
+                        <>Repository: {selectedRepository ?? ""}</>
+                      </NoSSR>
                     </div>
                     {conversation.map((message, index) => (
                       <Message key={index} message={message} />
@@ -142,35 +148,13 @@ const Chat = (props: any) => {
                   <div className="py-10 relative w-full flex flex-col h-full">
                     <div className="flex items-center justify-center gap-2">
                       <div className="relative w-full md:w-1/2 lg:w-1/3 xl:w-1/4">
-                        <button
-                          className="relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:border-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:border-white/20 dark:bg-white-800 sm:text-sm align-center"
-                          id="headlessui-listbox-button-:r0:"
-                          type="button"
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                          data-headlessui-state=""
-                          aria-labelledby="headlessui-listbox-label-:r1: headlessui-listbox-button-:r0:"
-                        >
-                          <label
-                            className="block text-xs text-gray-700 dark:text-gray-500 text-center"
-                            id="headlessui-listbox-label-:r1:"
-                            data-headlessui-state=""
-                          >
-                            Model
-                          </label>
-                          <span className="inline-flex w-full truncate">
-                            <span className="flex h-6 items-center gap-1 truncate text-gray">
-                              {selectedModel.name}
-                            </span>
-                          </span>
-                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <BsChevronDown className="h-4 w-4 text-gray-400" />
-                          </span>
-                        </button>
+                        <NoSSR>
+                          <RepositoryDropdown />
+                        </NoSSR>
                       </div>
                     </div>
                     <h1 className="text-2xl sm:text-4xl font-semibold text-center text-gray-200 dark:text-gray-600 flex gap-2 items-center justify-center h-screen">
-                      ChatGPT Clone
+                      Chat with Repositories !
                     </h1>
                   </div>
                 ) : null}
@@ -206,7 +190,7 @@ const Chat = (props: any) => {
                     onKeyDown={handleKeypress}
                   ></textarea>
                   <button
-                    disabled={isLoading || message?.length === 0}
+                    disabled={isLoading || message?.length === 0 || !selectedRepository}
                     onClick={sendMessage}
                     className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-transparent disabled:bg-gray-500 right-1 md:right-2 disabled:opacity-40"
                   >
@@ -215,12 +199,6 @@ const Chat = (props: any) => {
                 </div>
               </div>
             </form>
-            <div className="px-3 pt-2 pb-3 text-center text-xs text-black/50 dark:text-gray/50 md:px-4 md:pt-3 md:pb-6">
-              <span>
-                ChatGPT Clone may produce inaccurate information about people,
-                places, or facts.
-              </span>
-            </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import mixpanel from "mixpanel-browser";
-import useAppState from "./useAppState";
+import useAppStore from "./useAppStore";
 
 function useAnalytics() {
   const isDevelopment = process.env.APP_ENV === "development";
-  const { userId } = useAppState();
+  const { userId } = useAppStore()
 
   useEffect(() => {
     if (!process.env.MIXPANEL_PROJECT_TOKEN) {

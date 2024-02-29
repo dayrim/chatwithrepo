@@ -2,6 +2,11 @@ import { OpenAIModel } from "@/types/Model";
 
 export const LS_UUID = "@ls/uuid";
 
+export const LS_REPOSITORIES = "@ls/repositories";
+
+export const LS_SELECTED_REPOSITORY = "@ls/selectedRepository";
+export const LS_SHOW_ADD_REPO = "@ls/showAddRepo";
+
 export const DEFAULT_OPENAI_MODEL = {
   name: "Default (GPT-3.5)",
   id: "gpt-3.5-turbo",
