@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FiSend } from "react-icons/fi";
 import { BsChevronDown, BsPlusLg } from "react-icons/bs";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -8,13 +8,15 @@ import Message from "./Message";
 import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
 import AddRepo from "./AddRepo";
 import NoSSR from "@/shared/NoSSR";
-import { Dropdown } from "flowbite-react";
+import { Button, Dropdown } from "flowbite-react";
 import useAppState from "@/hooks/useAppStore";
 import RepositoryDropdown from "./RepositoryDropdown";
+import { CiCirclePlus } from "react-icons/ci";
+
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
-  const { selectedRepository, setShowAddRepo, showAddRepo } = useAppState();
+  const { selectedRepository, setShowAddRepo, showAddRepo, repositories } = useAppState();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmptyChat, setShowEmptyChat] = useState(true);
@@ -23,6 +25,7 @@ const Chat = (props: any) => {
   const { trackEvent } = useAnalytics();
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
+  const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
 
   const selectedModel = DEFAULT_OPENAI_MODEL;
 
@@ -153,9 +156,36 @@ const Chat = (props: any) => {
                         </NoSSR>
                       </div>
                     </div>
-                    <h1 className="text-2xl sm:text-4xl font-semibold text-center text-gray-200 dark:text-gray-600 flex gap-2 items-center justify-center h-screen">
-                      Chat with Repositories !
-                    </h1>
+                    <div className="flex flex-col gap-4 items-center justify-center h-screen">
+                      {showWelcomeMessage ? (
+                        <>
+                          <div className="text-center">
+                            <h1 className="text-2xl sm:text-4xl font-semibold text-gray-200 dark:text-gray-600 mb-4">
+                              Ready to Chat with Your Repositories?
+                            </h1>
+                            <p className="text-md sm:text-lg text-gray-400 dark:text-gray-500 mb-6">
+                              Start by adding a GitHub repository to explore its contents and chat with it. Let's get started!
+                            </p>
+                          </div>
+                          <Button
+                            size="xl"
+                            color="dark"
+                            outline
+                            onClick={() => setShowAddRepo(true)}
+                            className="flex items-center justify-center gap-4"
+                          >
+                            <CiCirclePlus className="h-6 w-6" />
+                            Add new repository
+                          </Button>
+                        </>
+                      ) : (
+                        <h1 className="text-2xl sm:text-4xl font-semibold text-center text-gray-200 dark:text-gray-600">
+                          Chat with Repositories!
+                        </h1>
+                      )}
+                    </div>
+
+
                   </div>
                 ) : null}
                 <div className="flex flex-col items-center text-sm dark:bg-white-800"></div>
@@ -172,31 +202,34 @@ const Chat = (props: any) => {
                     </div>
                   </div>
                 ) : null}
-                <div className="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-gray dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
-                  <textarea
-                    ref={textAreaRef}
-                    value={message}
-                    tabIndex={0}
-                    data-id="root"
-                    style={{
-                      height: "24px",
-                      maxHeight: "200px",
-                      overflowY: "hidden",
-                    }}
-                    // rows={1}
-                    placeholder="Send a message..."
-                    className="m-0 w-full resize-none border-0 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent pl-2 md:pl-0"
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={handleKeypress}
-                  ></textarea>
-                  <button
-                    disabled={isLoading || message?.length === 0 || !selectedRepository}
-                    onClick={sendMessage}
-                    className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-transparent disabled:bg-gray-500 right-1 md:right-2 disabled:opacity-40"
-                  >
-                    <FiSend className="h-4 w-4 mr-1 text-gray " />
-                  </button>
-                </div>
+                {!showWelcomeMessage && (
+                  <div className="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-gray dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
+                    <textarea
+                      ref={textAreaRef}
+                      value={message}
+                      tabIndex={0}
+                      data-id="root"
+                      style={{
+                        height: "24px",
+                        maxHeight: "200px",
+                        overflowY: "hidden",
+                      }}
+                      // rows={1}
+                      placeholder="Send a message..."
+                      className="m-0 w-full resize-none border-0 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent pl-2 md:pl-0"
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeypress}
+                    ></textarea>
+                    <button
+                      disabled={isLoading || message?.length === 0 || !selectedRepository}
+                      onClick={sendMessage}
+                      className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-transparent disabled:bg-gray-500 right-1 md:right-2 disabled:opacity-40"
+                    >
+                      <FiSend className="h-4 w-4 mr-1 text-gray " />
+                    </button>
+                  </div>
+                )}
+
               </div>
             </form>
           </div>
