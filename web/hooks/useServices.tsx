@@ -3,17 +3,11 @@ import { createClient } from "../../backend/build/client";
 import io from "socket.io-client";
 import socketio from "@feathersjs/socketio-client";
 import { useMemo } from "react";
-import { feathers } from '@feathersjs/feathers'
+import * as dotenv from "dotenv";
+dotenv.config({ path: '../.env' })
 
-
-
-const socket = io("http://localhost:3030/", {
-    transports: ['websocket'],
-    forceNew: true
-});
-// const client = createClient(socketio(socket));
-const client = feathers()
-client.configure(socketio(socket))
+const socket = io("http://localhost:3030/");
+const client = createClient(socketio(socket));
 
 function useServices() {
 
