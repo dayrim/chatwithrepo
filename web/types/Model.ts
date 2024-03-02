@@ -1,3 +1,5 @@
+import { Messages } from "../../backend/build/client";
+
 export type OpenAIModel = {
   name: string;
   id: string;
@@ -22,8 +24,10 @@ export type AppState = {
   repositories: Repositories;
   selectedRepository: string;
   showAddRepo: boolean;
+  messages: Messages[];
   setUserId: (userId: string) => void;
   setRepositories: (repositories: Repositories) => void;
   setSelectedRepository: (selectedRepository: string) => void;
   setShowAddRepo: (showAddRepo: boolean) => void;
+  setMessages: (messages: Messages[]) => void;
 };

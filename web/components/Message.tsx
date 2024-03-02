@@ -1,12 +1,61 @@
-import { SiOpenai } from "react-icons/si";
+import { useState } from "react";
+import { FiCopy } from "react-icons/fi";
+import { HiAcademicCap } from "react-icons/hi";
 import { HiUser } from "react-icons/hi";
 import { TbCursorText } from "react-icons/tb";
+// Instead of importing from 'react-syntax-highlighter/dist/esm/...', use:
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atomDark, dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+
+const CodeBlock = ({ language, code }: any) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copyToClipboard = async (text: any) => {
+    await navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+  };
+  console.log(language, 'language')
+  return (
+    <div className="relative group">
+      <SyntaxHighlighter language={language} style={atomDark} customStyle={{
+        padding: '1rem',
+        borderRadius: '0.5rem',
+        marginBottom: '1rem',
+      }}>
+        {code}
+      </SyntaxHighlighter>
+      <button
+        onClick={() => copyToClipboard(code)}
+        className="absolute right-2 top-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        {isCopied ? 'Copied' : <FiCopy />}
+      </button>
+    </div>
+  );
+};
+
 
 const Message = (props: any) => {
   const { message } = props;
-  const { role, content: text } = message;
+  const { role, text } = message;
 
   const isUser = role === "user";
+
+  const segments = text.split(/(```\w*\n[\s\S]*?\n```)/).filter(Boolean);
+
+  const renderSegment = (segment: any, index: any) => {
+    const codeMatch = segment.match(/```(\w*)\n([\s\S]*?)\n```/);
+    if (codeMatch) {
+      const [, language, code] = codeMatch;
+      return <CodeBlock key={`code-${index}`} language={language} code={code} />;
+    }
+    // Render regular text if not a code block
+    return <Markdown className={'markdown'} remarkPlugins={[remarkGfm]}>{segment}</Markdown>;
+  };
 
   return (
     <div
@@ -20,7 +69,7 @@ const Message = (props: any) => {
               {isUser ? (
                 <HiUser className="h-4 w-4 text-gray" />
               ) : (
-                <SiOpenai className="h-4 w-4 text-gray" />
+                <HiAcademicCap className="h-4 w-4 text-gray" />
               )}
             </div>
             <div className="text-xs flex items-center justify-center gap-1 absolute left-0 top-2 -ml-4 -translate-x-full group-hover:visible !invisible">
@@ -38,11 +87,11 @@ const Message = (props: any) => {
           <div className="relative flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
             <div className="flex flex-grow flex-col gap-3">
               <div className="flex flex-col items-start gap-4 whitespace-pre-wrap break-words">
-                <div className="markdown prose w-full break-words dark:prose-invert dark">
-                  {!isUser && text === null ? (
+                <div className="list-disc w-full break-words ">
+                  {!isUser && (text === null || text === "") ? (
                     <TbCursorText className="h-6 w-6 animate-pulse" />
                   ) : (
-                    <p>{text}</p>
+                    segments.map(renderSegment)
                   )}
                 </div>
               </div>

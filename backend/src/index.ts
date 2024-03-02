@@ -55,6 +55,9 @@ app.configure(channels)
 app.use(notFound())
 app.use(errorHandler({ logger }))
 
+app.service('messages').on('created', () => console.log('Created'))
+
+app.service('messages').on('patched', () => console.log('Patched'))
 // // Register hooks that run on all service methods
 // app.hooks({
 //   around: {

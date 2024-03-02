@@ -1,64 +1,89 @@
-// Import necessary modules
-import dotenv from "dotenv";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Ensure environment variables are loaded
-// dotenv.config();
+import { client } from "@/shared/BackendClient"; // Ensure this is correctly pointing to your FeathersJS client setup
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log("Request method:", req.method); // Log the request method
+  console.log("Received request:", req.method, req.body); // Log the request method and body
 
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    console.log("Request method not allowed");
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const body = req.body;
-  console.log("Request body:", body); // Log the request body to see what is being received
-
-  // Assuming `messages` is structured for Gemini usage
-  const messages =
-    body?.messages?.map((message: any) => ({
-      role: message.role,
-      parts: [message.content].filter(
-        (part) => part != null && part.trim() !== ""
-      ), // Filter out null or empty strings
-    })) || [];
-  const msg = body?.message || "How many paws are in my house?";
-
-  console.log("Messages for Gemini:", messages); // Log the messages array
-  console.log("Message to send:", msg); // Log the message to be sent
+  const { history, message: initialMessage, userId } = req.body;
+  console.log("Processing messages for userId:", userId); // Log the userId and initial setup
 
   try {
-    console.log("API Key:", process.env.GEMINI_API_KEY); // Check if API Key is correctly loaded
+    console.log("Creating an empty message");
+    const createdMessage = await client.service("messages").create({
+      userId,
+      text: "",
+      role: "model",
+    });
+    const messageId = createdMessage.id; // Log the created message ID
+    console.log("Created message ID:", messageId);
+
+    console.log("Initializing Google Generative AI with model: gemini-pro");
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    console.log("Model loaded:", model); // Verify that the model is loaded
+    const alternatingHistory = ensureAlternatingHistory(history);
 
-    const chat = model.startChat({
-      history: messages,
-    });
+    const geminiHistory = alternatingHistory.map(({ role, text }: any) => ({
+      role,
+      parts: text,
+    }));
+    console.log("Chat history for streaming:", geminiHistory);
+    const chat = model.startChat({ history: geminiHistory });
 
-    console.log("Chat session started:", chat); // Verify that the chat session is started
+    console.log(
+      "Starting message stream with initial message:",
+      initialMessage
+    );
+    const result = await chat.sendMessageStream(initialMessage);
 
-    const result = await chat.sendMessage(msg);
-    const response = await result.response;
-    const text = await response.text();
+    let text = "";
+    for await (const chunk of result.stream) {
+      const chunkText = await chunk.text();
+      console.log("Received chunk:", chunkText);
+      text += chunkText;
+      // Update the message with new chunk
+      console.log(`Updating message ID ${messageId} with new chunk.`);
+      await client.service("messages").patch(messageId, { text });
+    }
 
-    console.log("Generated text:", text); // Log the generated text
-
-    // Respond with the generated message
+    console.log("Completed streaming. Final message text:", text);
     res.status(200).json({ message: text });
   } catch (error) {
-    console.error("Error in handler:", error); // Log detailed error information
-    res.status(500).json({
-      error:
-        "An error occurred during the request to Google Generative AI. Please try again.",
-    });
+    console.error("Error in handler:", error);
+    res.status(500).json({ error: "An error occurred. Please try again." });
   }
+}
+
+function ensureAlternatingHistory(history: any) {
+  const alternatingHistory: any[] = [];
+  let lastRole = "model"; // Assume the last message was from the model
+
+  history.forEach((message: any, index: number) => {
+    if (index === 0 || message.role !== lastRole) {
+      alternatingHistory.push(message);
+      lastRole = message.role; // Update lastRole to the current message's role
+    } else {
+      // If the current message's role is the same as the last message's role,
+      // insert a filler message with the opposite role
+      const fillerMessage = {
+        userId: message.userId,
+        text: "...", // Placeholder text or some logic to generate appropriate text
+        role: lastRole === "user" ? "model" : "user",
+      };
+      alternatingHistory.push(fillerMessage);
+      alternatingHistory.push(message);
+      lastRole = message.role; // Update lastRole to the current message's role
+    }
+  });
+
+  return alternatingHistory;
 }

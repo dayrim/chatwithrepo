@@ -28,7 +28,7 @@ export const messages = (app: Application) => {
     // A list of all methods this service exposes externally
     methods: messagesMethods,
     // You can add additional custom events to be sent to clients here
-    events: ['added']
+    events: []
   })
   // Initialize hooks
   app.service(messagesPath).hooks({

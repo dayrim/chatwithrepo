@@ -28,9 +28,9 @@ export const channels = (app: Application) => {
   })
 
   app.publish((data: any, context: HookContext) => {
-    // Check if it's a 'create' event for the 'messages' service
-    if (context.path === 'messages' && context.method === 'create') {
-      // Send 'create' events from 'messages' to both 'anonymous' and 'authenticated' channels
+    console.log(context.method, 'METHOD')
+    if (context.path === 'messages' && (context.method === 'patch' || context.method === 'create')) {
+      console.log('Publishing yo')
       return app.channel('anonymous', 'authenticated')
     }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiSend } from "react-icons/fi";
 import { BsChevronDown, BsPlusLg } from "react-icons/bs";
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -15,20 +15,34 @@ import RepositoryDropdown from "./RepositoryDropdown";
 import { CiCirclePlus } from "react-icons/ci";
 
 const Chat = (props: any) => {
+
+  const { messagesService, } = useServices();
+  const { setMessages, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
+
+  console.log(messages, 'messages')
+  const fetchMessages = useCallback(async () => {
+    const { data: messages } = await messagesService.find();
+    setMessages(messages)
+    if (messages.length > 0) {
+      setShowEmptyChat(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchMessages()
+    messagesService.on('created', (message) => pushMessage(message))
+    messagesService.on('patched', (message) => updateMessageById(message.id, message))
+  }, [])
+
   const { toggleComponentVisibility } = props;
-  const { messagesService } = useServices();
-  const { selectedRepository, setShowAddRepo, showAddRepo, repositories, userId } = useAppState();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmptyChat, setShowEmptyChat] = useState(true);
-  const [conversation, setConversation] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const { trackEvent } = useAnalytics();
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
   const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
-
-  const selectedModel = DEFAULT_OPENAI_MODEL;
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -41,7 +55,7 @@ const Chat = (props: any) => {
     if (bottomOfChatRef.current) {
       bottomOfChatRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [conversation]);
+  }, [messages]);
 
   const sendMessage = async (e: any) => {
     e.preventDefault();
@@ -57,38 +71,24 @@ const Chat = (props: any) => {
     trackEvent("send.message", { message: message });
     setIsLoading(true);
 
-    // Add the message to the conversation
-    setConversation([
-      ...conversation,
-      { content: message, role: "user" },
-    ]);
-    messagesService.create({ text: message, userId })
-    // Clear the message & remove empty chat
-    setMessage("");
-    setShowEmptyChat(false);
-
     try {
+      await messagesService.create({ text: message, userId, role: "user" });
+      setMessage("");
+      setShowEmptyChat(false);
+
       const response = await fetch(`/api/gemini`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          history: [...conversation, { content: message, role: "user" }],
+          history: messages,
           message,
+          userId
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-
-        // Add the message to the conversation
-        setConversation([
-          ...conversation,
-          { content: message, role: "user" },
-          { content: data.message, role: "model" },
-        ]);
-      } else {
+      if (!response.ok) {
         console.error(response);
         setErrorMessage(response.statusText);
       }
@@ -97,7 +97,6 @@ const Chat = (props: any) => {
     } catch (error: any) {
       console.error(error);
       setErrorMessage(error.message);
-
       setIsLoading(false);
     }
   };
@@ -133,14 +132,14 @@ const Chat = (props: any) => {
           <div className="flex-1 overflow-hidden">
             <div className="react-scroll-to-bottom--css-ikyem-79elbk h-full dark:bg-white-800">
               <div className="react-scroll-to-bottom--css-ikyem-1n7m0yu">
-                {!showEmptyChat && conversation.length > 0 ? (
+                {!showEmptyChat && messages.length > 0 ? (
                   <div className="flex flex-col items-center text-sm bg-white-800">
                     <div className="flex w-full items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">
                       <NoSSR>
                         <>Repository: {selectedRepository ?? ""}</>
                       </NoSSR>
                     </div>
-                    {conversation.map((message, index) => (
+                    {messages.map((message, index) => (
                       <Message key={index} message={message} />
                     ))}
                     <div className="w-full h-32 md:h-48 flex-shrink-0"></div>

@@ -28,7 +28,7 @@ export const messagesResolver = resolve<Messages, HookContext<MessagesService>>(
 export const messagesExternalResolver = resolve<Messages, HookContext<MessagesService>>({})
 
 // Schema for creating new entries
-export const messagesDataSchema = Type.Pick(messagesSchema, ['userId', 'text'], {
+export const messagesDataSchema = Type.Pick(messagesSchema, ['userId', 'text', 'role'], {
   $id: 'MessagesData'
 })
 

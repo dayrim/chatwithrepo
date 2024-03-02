@@ -39,3 +39,29 @@ textarea:focus {
   outline: none;
   box-shadow: none;
 }
+.markdown ul {
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+}
+
+.markdown code {
+  /* Dark background */
+  background-color: rgb(224 224 224);
+
+  /* Light text */
+  color: rgb(0 0 0);
+
+  /* Slightly rounded edges */
+  border-radius: 4px;
+
+  /* Padding inside the code element */
+  padding: 0.25em 0.5em;
+
+  /* Optional: If you want to change the font to a monospace font */
+  font-family: "Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+
+  /* Optional: Slight font size adjustment and line height */
+  font-size: 0.9em;
+  line-height: 1.6;
+}

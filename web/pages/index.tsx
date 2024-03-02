@@ -3,25 +3,10 @@ import Chat from "@/components/Chat";
 import MobileSiderbar from "@/components/MobileSidebar";
 import Sidebar from "@/components/Sidebar";
 import useAnalytics from "@/hooks/useAnalytics";
-import useServices from "@/hooks/useServices";
-
-
-
-
-
-
-
 export default function Home() {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const { trackEvent } = useAnalytics();
-  const { messagesService } = useServices();
 
-  useEffect(() => {
-
-    messagesService.on('created', (message) => console.log('Created a message', message))
-
-
-  }, [])
   useEffect(() => {
     trackEvent("page.view", { page: "home" });
   }, [trackEvent]);
