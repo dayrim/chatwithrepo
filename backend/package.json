@@ -35,7 +35,7 @@
   ],
   "main": "build/client",
   "scripts": {
-    "dev": "nodemon -x ts-node src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"yarn run build && node build/\"",
     "build": "shx rm -rf build/ && tsc",
     "start": "node build/",
     "prettier": "npx prettier \"**/*.ts\" --write",
@@ -56,6 +56,7 @@
     "@feathersjs/express": "^5.0.23",
     "@feathersjs/feathers": "^5.0.23",
     "@feathersjs/knex": "^5.0.23",
+    "@feathersjs/koa": "^5.0.23",
     "@feathersjs/schema": "^5.0.23",
     "@feathersjs/socketio": "^5.0.23",
     "@feathersjs/transport-commons": "^5.0.23",
@@ -65,6 +66,7 @@
     "knex": "^3.1.0",
     "next": "14.1.0",
     "pg": "^8.11.3",
+    "uuid": "^9.0.1",
     "winston": "^3.11.0"
   },
   "devDependencies": {

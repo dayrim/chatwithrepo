@@ -27,12 +27,14 @@ export const channels = (app: Application) => {
     }
   })
 
-  // eslint-disable-next-line no-unused-vars
   app.publish((data: any, context: HookContext) => {
-    // Here you can add event publishers to channels set up in `channels.js`
-    // To publish only for a specific event use `app.publish(eventname, () => {})`
+    // Check if it's a 'create' event for the 'messages' service
+    if (context.path === 'messages' && context.method === 'create') {
+      // Send 'create' events from 'messages' to both 'anonymous' and 'authenticated' channels
+      return app.channel('anonymous', 'authenticated')
+    }
 
-    // e.g. to publish all service events to all authenticated users use
+    // For all other events, publish only to the 'authenticated' channel
     return app.channel('authenticated')
   })
 }

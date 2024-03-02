@@ -3,6 +3,7 @@ import { FiSend } from "react-icons/fi";
 import { BsChevronDown, BsPlusLg } from "react-icons/bs";
 import { RxHamburgerMenu } from "react-icons/rx";
 import useAnalytics from "@/hooks/useAnalytics";
+import useServices from "@/hooks/useServices";
 import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
@@ -16,7 +17,8 @@ import { CiCirclePlus } from "react-icons/ci";
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
-  const { selectedRepository, setShowAddRepo, showAddRepo, repositories } = useAppState();
+  const { messagesService } = useServices();
+  const { selectedRepository, setShowAddRepo, showAddRepo, repositories, userId } = useAppState();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmptyChat, setShowEmptyChat] = useState(true);
@@ -62,7 +64,7 @@ const Chat = (props: any) => {
       { content: message, role: "user" },
       { content: null, role: "system" },
     ]);
-
+    messagesService.create({ text: message, userId }).then((data) => console.log("After created", data))
     // Clear the message & remove empty chat
     setMessage("");
     setShowEmptyChat(false);

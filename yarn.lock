@@ -557,7 +557,7 @@
 
 "@feathersjs/feathers@^5.0.23":
   version "5.0.23"
-  resolved "https://registry.npmjs.org/@feathersjs/feathers/-/feathers-5.0.23.tgz"
+  resolved "https://registry.yarnpkg.com/@feathersjs/feathers/-/feathers-5.0.23.tgz#8c1b41bbb7a25c6278c0638b349b508a6599fe5d"
   integrity sha512-vYOiGQ+NcBFX5ETJGC/en3j1zZ+Y3PLuF2m2hPQEbBKstHB7prbk6bnCYOcLKOnKJbh19FrAVE4WxbSrkFIaVQ==
   dependencies:
     "@feathersjs/commons" "^5.0.23"
@@ -592,7 +592,7 @@
 
 "@feathersjs/koa@^5.0.23":
   version "5.0.23"
-  resolved "https://registry.npmjs.org/@feathersjs/koa/-/koa-5.0.23.tgz"
+  resolved "https://registry.yarnpkg.com/@feathersjs/koa/-/koa-5.0.23.tgz#36d141227373fab634fff094058bcfd080e8ed15"
   integrity sha512-P5RUB+K7ncJ6xPCTSCjyuWQ0V3xuIFED9I7bAJamrzdvUG1V/dndDWcoLGUlTXjoxXDcPnyrYCsBF1JzCskZSw==
   dependencies:
     "@feathersjs/authentication" "^5.0.23"
@@ -636,6 +636,14 @@
     ajv "^8.12.0"
     ajv-formats "^2.1.1"
     json-schema-to-ts "^3.0.0"
+
+"@feathersjs/socketio-client@^5.0.23":
+  version "5.0.23"
+  resolved "https://registry.yarnpkg.com/@feathersjs/socketio-client/-/socketio-client-5.0.23.tgz#8530838acdf23ab453911f7620e2224bf2f5c77b"
+  integrity sha512-CY5OZ+j3OZtqlobuf9mJh2t8W5Src1NbDQ0K2ycSM/nsf3nI/eLSdIDeo07Vye3lK+zZ3B6bSGcRsQCtjvpIww==
+  dependencies:
+    "@feathersjs/feathers" "^5.0.23"
+    "@feathersjs/transport-commons" "^5.0.23"
 
 "@feathersjs/socketio@^5.0.23":
   version "5.0.23"
@@ -2962,6 +2970,17 @@ end-of-stream@^1.1.0, end-of-stream@^1.4.1:
   integrity sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==
   dependencies:
     once "^1.4.0"
+
+engine.io-client@~6.5.2:
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-6.5.3.tgz#4cf6fa24845029b238f83c628916d9149c399bc5"
+  integrity sha512-9Z0qLB0NIisTRt1DZ/8U2k12RJn8yls/nXMZLn+/N8hANT3TcYjKFKcwbw5zFQiN4NTde3TSY9zb79e1ij6j9Q==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.1"
+    engine.io-parser "~5.2.1"
+    ws "~8.11.0"
+    xmlhttprequest-ssl "~2.0.0"
 
 engine.io-parser@~5.2.1:
   version "5.2.2"
@@ -7618,6 +7637,16 @@ socket.io-adapter@~2.5.2:
     debug "~4.3.4"
     ws "~8.11.0"
 
+socket.io-client@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.7.4.tgz#5f0e060ff34ac0a4b4c5abaaa88e0d1d928c64c8"
+  integrity sha512-wh+OkeF0rAVCrABWQBaEjLfb7DVPotMbu0cgWgyR0v6eA4EoVnAwcIeIbcdTE3GT/H3kbdLl7OoH2+asoDRIIg==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.2"
+    engine.io-client "~6.5.2"
+    socket.io-parser "~4.2.4"
+
 socket.io-parser@~4.2.4:
   version "4.2.4"
   resolved "https://registry.npmjs.org/socket.io-parser/-/socket.io-parser-4.2.4.tgz"
@@ -8478,7 +8507,7 @@ uuid@^8.3.2:
 
 uuid@^9.0.0, uuid@^9.0.1:
   version "9.0.1"
-  resolved "https://registry.npmjs.org/uuid/-/uuid-9.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 uvu@^0.5.0:
@@ -8703,6 +8732,11 @@ ws@~8.11.0:
   version "8.11.0"
   resolved "https://registry.npmjs.org/ws/-/ws-8.11.0.tgz"
   integrity sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg==
+
+xmlhttprequest-ssl@~2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/xmlhttprequest-ssl/-/xmlhttprequest-ssl-2.0.0.tgz#91360c86b914e67f44dce769180027c0da618c67"
+  integrity sha512-QKxVRxiRACQcVuQEYFsI1hhkrMlrXHPegbbd1yn9UHOmRxY+si12nQYzri3vbzt8VdTTRviqcKxcyllFas5z2A==
 
 xtend@^4.0.0, xtend@~4.0.1:
   version "4.0.2"

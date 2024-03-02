@@ -2,7 +2,8 @@
   "host": "localhost",
   "port": 3030,
   "origins": [
-    "http://localhost:3030"
+    "http://localhost:3030",
+    "http://localhost:3000"
   ],
   "paginate": {
     "default": 10,
@@ -10,7 +11,7 @@
   },
   "postgresql": {
     "client": "pg",
-    "connection": "postgres://postgres:@localhost:5432/backend"
+    "connection": "postgresql://postgres:pg_password@localhost:5587/chatwithrepo"
   },
   "authentication": {
     "entity": "user",

@@ -12,11 +12,11 @@ import type { UserService } from './users.class'
 export const userSchema = Type.Object(
   {
     id: Type.String({ format: 'uuid' }),
-    email: Type.String(),
+    email: Type.Optional(Type.String()),
     password: Type.Optional(Type.String()),
     githubId: Type.Optional(Type.String()),
     geminiApiKey: Type.Optional(Type.String()),
-    name: Type.String(),
+    name: Type.Optional(Type.String()),
     created_at: Type.String({ format: 'date-time' }),
     updated_at: Type.String({ format: 'date-time' })
   },
@@ -34,7 +34,7 @@ export const userExternalResolver = resolve<User, HookContext<UserService>>({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['email', 'password', 'githubId', 'name'], {
+export const userDataSchema = Type.Pick(userSchema, ['id', 'email', 'password', 'githubId', 'name'], {
   $id: 'UserData'
 })
 export type UserData = Static<typeof userDataSchema>
