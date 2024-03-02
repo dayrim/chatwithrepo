@@ -12,8 +12,9 @@ import type { MessagesService } from './messages.class'
 export const messagesSchema = Type.Object(
   {
     id: Type.String(), // Assuming UUIDs are used for ids, so this should be a string
-    text: Type.String(), // Making it optional to allow for nullable
-    userId: Type.String(), // Assuming UUIDs for user IDs
+    text: Type.String(),
+    role: Type.String(),
+    userId: Type.String(),
     createdAt: Type.Optional(Type.String({ format: 'date-time' })), // Optional to reflect nullable, using a string with date-time format
     updatedAt: Type.Optional(Type.String({ format: 'date-time' })) // Optional to reflect nullable, using a string with date-time format
   },

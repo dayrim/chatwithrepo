@@ -4,13 +4,17 @@
     "**/.env.*local"
   ],
   "pipeline": {
-    "build": {
+    "backend#build": {
+      "outputs": [
+        "build/**/*"
+      ]
+    },
+    "web#build": {
       "dependsOn": [
-        "^build"
+        "backend#build"
       ],
       "outputs": [
-        "build/**",
-        ".next/**",
+        ".next/**/*",
         "!.next/cache/**"
       ]
     },

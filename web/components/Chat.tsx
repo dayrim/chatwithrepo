@@ -14,7 +14,6 @@ import useAppState from "@/hooks/useAppStore";
 import RepositoryDropdown from "./RepositoryDropdown";
 import { CiCirclePlus } from "react-icons/ci";
 
-
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
   const { messagesService } = useServices();
@@ -62,22 +61,21 @@ const Chat = (props: any) => {
     setConversation([
       ...conversation,
       { content: message, role: "user" },
-      { content: null, role: "system" },
     ]);
-    messagesService.create({ text: message, userId }).then((data) => console.log("After created", data))
+    messagesService.create({ text: message, userId })
     // Clear the message & remove empty chat
     setMessage("");
     setShowEmptyChat(false);
 
     try {
-      const response = await fetch(`/api/openai`, {
+      const response = await fetch(`/api/gemini`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...conversation, { content: message, role: "user" }],
-          model: selectedModel,
+          history: [...conversation, { content: message, role: "user" }],
+          message,
         }),
       });
 
@@ -88,7 +86,7 @@ const Chat = (props: any) => {
         setConversation([
           ...conversation,
           { content: message, role: "user" },
-          { content: data.message, role: "system" },
+          { content: data.message, role: "model" },
         ]);
       } else {
         console.error(response);
