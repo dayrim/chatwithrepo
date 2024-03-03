@@ -19,7 +19,6 @@ const Chat = (props: any) => {
   const { messagesService, } = useServices();
   const { setMessages, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
 
-  console.log(messages, 'messages')
   const fetchMessages = useCallback(async () => {
     const { data: messages } = await messagesService.find();
     setMessages(messages)

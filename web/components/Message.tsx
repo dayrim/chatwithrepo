@@ -18,7 +18,6 @@ const CodeBlock = ({ language, code }: any) => {
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
   };
-  console.log(language, 'language')
   return (
     <div className="relative group">
       <SyntaxHighlighter language={language} style={atomDark} customStyle={{
@@ -54,7 +53,7 @@ const Message = (props: any) => {
       return <CodeBlock key={`code-${index}`} language={language} code={code} />;
     }
     // Render regular text if not a code block
-    return <Markdown className={'markdown'} remarkPlugins={[remarkGfm]}>{segment}</Markdown>;
+    return <Markdown key={`markdown-${index}`} className={'markdown'} remarkPlugins={[remarkGfm]}>{segment}</Markdown>;
   };
 
   return (

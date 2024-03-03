@@ -11,6 +11,7 @@ function useServices() {
     const messagesService = useMemo(() => client.service('messages'), [])
 
     return {
+        client,
         usersService,
         messagesService
     };

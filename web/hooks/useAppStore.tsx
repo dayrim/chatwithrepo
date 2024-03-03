@@ -11,7 +11,7 @@ interface MyState extends AppState {
   updateMessageById: (id: string, updatedFields: Partial<Messages>) => void;
 }
 
-const useAuthStore = create<MyState>()(
+const useAppStore = create<MyState>()(
   persist(
     (set, get) => ({
       userId: uuid(),
@@ -50,4 +50,4 @@ const useAuthStore = create<MyState>()(
   )
 );
 
-export default useAuthStore;
+export default useAppStore;
