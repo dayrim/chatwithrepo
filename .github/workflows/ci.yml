@@ -61,7 +61,7 @@ jobs:
           echo "APP_NAME=${{ secrets.APP_NAME }}" >> .env
           echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
           echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "MIXPANEL_PROJECT_TOKEN=${{ secrets.MIXPANEL_PROJECT_TOKEN }}" >> .env
+          echo "NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN }}" >> .env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
           echo "API_URL=${{ secrets.API_URL }}" >> .env
 
