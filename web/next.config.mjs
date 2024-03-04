@@ -11,6 +11,7 @@ const nextConfig = {
     APP_ENV: process.env.APP_ENV,
     APP_NAME: process.env.APP_NAME,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    API_URL: process.env.API_URL,
   },
 };
 

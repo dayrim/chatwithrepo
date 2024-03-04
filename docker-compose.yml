@@ -21,6 +21,7 @@ services:
       APP_ENV: production
       AUTH_SECRET: ${AUTH_SECRET}
       MIXPANEL_PROJECT_TOKEN: ${MIXPANEL_PROJECT_TOKEN}
+      API_URL: ${API_URL}
       POSTGRESQL_CONNECTION: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${APP_NAME}
     ports:
       - "${PORT}:${PORT}"
