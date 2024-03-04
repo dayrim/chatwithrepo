@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 
 import * as dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+import { join } from "path";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: join(__dirname, "../.env") });
 
 const nextConfig = {
   reactStrictMode: false,
