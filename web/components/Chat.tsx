@@ -17,21 +17,36 @@ import { CiCirclePlus } from "react-icons/ci";
 const Chat = (props: any) => {
 
   const { messagesService, } = useServices();
-  const { setMessages, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
+  const { setMessages, setUserId, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
 
   const fetchMessages = useCallback(async () => {
-    const { data: messages } = await messagesService.find();
-    setMessages(messages)
-    if (messages.length > 0) {
-      setShowEmptyChat(false)
+    if (!userId) return;
+    try {
+      const { data: messages } = await messagesService.find({
+        query: {
+          userId,
+        },
+      });
+      setMessages(messages);
+
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
     }
-  }, [])
+  }, [messagesService, setMessages, userId]);
 
   useEffect(() => {
     fetchMessages()
+  }, [fetchMessages])
+  useEffect(() => {
+    if (!!messages.length) {
+      setShowEmptyChat(false);
+    }
+  }, [messages])
+
+  useEffect(() => {
     messagesService.on('created', (message) => pushMessage(message))
     messagesService.on('patched', (message) => updateMessageById(message.id, message))
-  }, [])
+  }, [messagesService, pushMessage, updateMessageById])
 
   const { toggleComponentVisibility } = props;
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +58,9 @@ const Chat = (props: any) => {
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
   const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
 
+
+  console.log(messages, 'messages')
+  console.log(showEmptyChat, 'showEmptyChat')
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "24px";
@@ -56,9 +74,11 @@ const Chat = (props: any) => {
     }
   }, [messages]);
 
-  const sendMessage = async (e: any) => {
+  const sendMessage = useCallback(async (e: any) => {
     e.preventDefault();
-
+    if (!userId) {
+      return;
+    }
     // Don't send empty messages
     if (message.length < 1) {
       setErrorMessage("Please enter a message.");
@@ -98,7 +118,7 @@ const Chat = (props: any) => {
       setErrorMessage(error.message);
       setIsLoading(false);
     }
-  };
+  }, [message, messages, messagesService, trackEvent, userId])
 
   const handleKeypress = (e: any) => {
     // It's triggers by pressing the enter key

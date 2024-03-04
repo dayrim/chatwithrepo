@@ -61,6 +61,7 @@
     "@feathersjs/socketio": "^5.0.23",
     "@feathersjs/transport-commons": "^5.0.23",
     "@feathersjs/typebox": "^5.0.23",
+    "chalk": "4.1.2",
     "compression": "^1.7.4",
     "dotenv": "^16.4.5",
     "knex": "^3.1.0",

@@ -1,9 +1,39 @@
+'use client'
 import { useEffect, useState } from "react";
 import Chat from "@/components/Chat";
 import MobileSiderbar from "@/components/MobileSidebar";
 import Sidebar from "@/components/Sidebar";
 import useAnalytics from "@/hooks/useAnalytics";
-export default function Home() {
+import useAppStore, { AppStoreProvider } from "@/hooks/useAppStore";
+
+import { v4 as uuidv4 } from 'uuid';
+import { serialize } from 'cookie';
+import { GetServerSideProps } from "next";
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  let userId = req.cookies.userId;
+  if (!userId) {
+    userId = uuidv4();
+
+    const cookie = serialize('userId', userId, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'strict',
+    });
+
+    res.setHeader('Set-Cookie', cookie);
+  }
+
+  return { props: { userId } };
+};
+
+interface HomeProps {
+  userId: string;
+}
+
+const Home: React.FC<HomeProps> = ({ userId }) => {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const { trackEvent } = useAnalytics();
 
@@ -16,6 +46,7 @@ export default function Home() {
   };
 
   return (
+
     <main className="overflow-hidden w-full h-screen relative flex">
       {isComponentVisible ? (
         <MobileSiderbar toggleComponentVisibility={toggleComponentVisibility} />
@@ -29,3 +60,6 @@ export default function Home() {
     </main>
   );
 }
+
+
+export default Home;

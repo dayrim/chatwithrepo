@@ -1,37 +1,52 @@
-// For more information about this file see https://dove.feathersjs.com/guides/cli/channels.html
+// channels.ts
 import type { RealTimeConnection, Params } from '@feathersjs/feathers'
 import type { AuthenticationResult } from '@feathersjs/authentication'
 import '@feathersjs/transport-commons'
 import type { Application, HookContext } from './declarations'
 import { logger } from './logger'
+import { parseCookies } from './utils'
 
 export const channels = (app: Application) => {
-  logger.warn(
-    'Publishing all events to all authenticated users. See `channels.ts` and https://dove.feathersjs.com/api/channels.html for more information.'
-  )
-
   app.on('connection', (connection: RealTimeConnection) => {
-    // On a new real-time connection, add it to the anonymous channel
-    app.channel('anonymous').join(connection)
+    logger.info('New connection', { connection })
+
+    if (connection.headers && connection.headers.cookie) {
+      const cookies = parseCookies(connection.headers.cookie)
+      const userId = cookies['userId'] // Extract userId from parsed cookies
+      logger.info('Extracted userId from cookies', { userId })
+
+      if (userId) {
+        const userChannel = `user/${userId}`
+        logger.info(`Joining user channel: ${userChannel}`)
+        app.channel(userChannel).join(connection)
+      }
+    }
+  })
+
+  app.on('disconnect', (connection) => {
+    logger.info('Connection disconnected', { connection })
+    // Remove the connection from all channels it joined
+    app.channels.forEach((channel) => {
+      app.channel(channel).leave(connection)
+    })
   })
 
   app.on('login', (authResult: AuthenticationResult, { connection }: Params) => {
-    // connection can be undefined if there is no
-    // real-time connection, e.g. when logging in via REST
+    logger.info('User login', { authResult, connection })
+    // connection can be undefined if there is no real-time connection, e.g., when logging in via REST
     if (connection) {
-      // The connection is no longer anonymous, remove it
-      app.channel('anonymous').leave(connection)
-
       // Add it to the authenticated user channel
       app.channel('authenticated').join(connection)
     }
   })
 
   app.publish((data: any, context: HookContext) => {
-    console.log(context.method, 'METHOD')
+    logger.info('Publishing event', { method: context.method, path: context.path, data })
     if (context.path === 'messages' && (context.method === 'patch' || context.method === 'create')) {
-      console.log('Publishing yo')
-      return app.channel('anonymous', 'authenticated')
+      if (!!data?.userId) {
+        logger.info('Sending to user channel', { userId: data.userId })
+        return app.channel(`user/${data.userId}`)
+      }
     }
 
     // For all other events, publish only to the 'authenticated' channel

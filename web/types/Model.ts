@@ -20,7 +20,7 @@ export type Repositories = {
 };
 
 export type AppState = {
-  userId: string;
+  userId: string | undefined;
   repositories: Repositories;
   selectedRepository: string;
   showAddRepo: boolean;
@@ -30,4 +30,6 @@ export type AppState = {
   setSelectedRepository: (selectedRepository: string) => void;
   setShowAddRepo: (showAddRepo: boolean) => void;
   setMessages: (messages: Messages[]) => void;
+  pushMessage: (message: Messages) => void;
+  updateMessageById: (id: string, updatedFields: Partial<Messages>) => void;
 };
