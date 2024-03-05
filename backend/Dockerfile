@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=builder /app/out/full/ .
 COPY .gitignore .gitignore
-RUN yarn turbo run build --filter=backend --include-dependencies --no-deps
+RUN yarn turbo run build --scope=backend --filter=backend --include-dependencies --no-deps
 
 FROM node:20-alpine as runner
 WORKDIR /app
