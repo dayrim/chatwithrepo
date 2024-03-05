@@ -1,12 +1,12 @@
-# Builder stage
 FROM node:20-alpine AS builder
 RUN apk update
+# Set working directory
 WORKDIR /app
 RUN yarn global add turbo
 COPY . .
-RUN turbo prune web --docker
+RUN turbo prune backend --docker
 
-# Installer stage
+# Add lockfile and package.json's of isolated subworkspace
 FROM node:20-alpine AS installer
 RUN apk update
 WORKDIR /app
@@ -15,23 +15,15 @@ COPY --from=builder /app/out/yarn.lock ./yarn.lock
 COPY --from=builder /app/turbo.json ./turbo.json
 RUN yarn install --frozen-lockfile
 
-# Sourcer stage, similar to the installer but prepares the full application
+
 FROM node:20-alpine AS sourcer
 WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=builder /app/out/full/ .
 COPY .gitignore .gitignore
-RUN yarn turbo run build --filter=web --include-dependencies --no-deps
+RUN yarn turbo run build --filter=backend --include-dependencies --no-deps
 
-# Runner stage
-FROM node:20-alpine AS runner
+FROM node:20-alpine as runner
 WORKDIR /app
-
-# Setting the Next.js specific files and directories
-COPY --from=sourcer /app/apps/web/next.config.js .
-COPY --from=sourcer /app/apps/web/package.json .
-COPY --from=sourcer /app/apps/web/.next/standalone ./
-COPY --from=sourcer /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=sourcer /app/apps/web/public ./apps/web/public
-
-CMD ["node", "apps/web/server.js"]
+COPY --from=sourcer /app/ .
+CMD [ "node", "apps/backend/build/index.js" ]
