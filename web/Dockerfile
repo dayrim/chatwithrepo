@@ -28,10 +28,10 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Setting the Next.js specific files and directories
-COPY --from=sourcer /app/apps/web/next.config.js .
-COPY --from=sourcer /app/apps/web/package.json .
-COPY --from=sourcer /app/apps/web/.next/standalone ./
-COPY --from=sourcer /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=sourcer /app/apps/web/public ./apps/web/public
+COPY --from=sourcer /app/web/next.config.js .
+COPY --from=sourcer /app/web/package.json .
+COPY --from=sourcer /app/web/.next/standalone ./
+COPY --from=sourcer /app/web/.next/static ./web/.next/static
+COPY --from=sourcer /app/web/public ./web/public
 
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "web/server.js"]
