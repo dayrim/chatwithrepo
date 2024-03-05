@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { client } from "@/shared/BackendClient"; // Ensure this is correctly pointing to your FeathersJS client setup
+import { createClient } from "@/shared/BackendClient"; // Ensure this is correctly pointing to your FeathersJS client setup
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,6 +14,8 @@ export default async function handler(
   }
 
   const { history, message: initialMessage, userId } = req.body;
+  const client = createClient(userId);
+
   console.log("Processing messages for userId:", userId); // Log the userId and initial setup
 
   try {

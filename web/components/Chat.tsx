@@ -16,22 +16,25 @@ import { CiCirclePlus } from "react-icons/ci";
 
 const Chat = (props: any) => {
 
-  const { messagesService, } = useServices();
+  const { messagesService } = useServices();
   const { setMessages, setUserId, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
 
   const fetchMessages = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const { data: messages } = await messagesService.find({
-        query: {
-          userId,
-        },
-      });
-      setMessages(messages);
 
-    } catch (error) {
-      console.error("Failed to fetch messages:", error);
+    if (messagesService) {
+      try {
+        const { data: messages } = await messagesService.find({
+          query: {
+            userId,
+          },
+        });
+        setMessages(messages);
+
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
     }
+
   }, [messagesService, setMessages, userId]);
 
   useEffect(() => {
@@ -44,8 +47,11 @@ const Chat = (props: any) => {
   }, [messages])
 
   useEffect(() => {
-    messagesService.on('created', (message) => pushMessage(message))
-    messagesService.on('patched', (message) => updateMessageById(message.id, message))
+    if (!!messagesService) {
+      console.log("ADDING LISTENERS")
+      messagesService.on('created', (message) => pushMessage(message))
+      messagesService.on('patched', (message) => updateMessageById(message.id, message))
+    }
   }, [messagesService, pushMessage, updateMessageById])
 
   const { toggleComponentVisibility } = props;
@@ -76,7 +82,7 @@ const Chat = (props: any) => {
 
   const sendMessage = useCallback(async (e: any) => {
     e.preventDefault();
-    if (!userId) {
+    if (!userId || !messagesService) {
       return;
     }
     // Don't send empty messages

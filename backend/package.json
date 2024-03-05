@@ -35,8 +35,8 @@
   ],
   "main": "build/client",
   "scripts": {
+    "build": "shx rm -rf build/ && node esbuild.config.mjs",
     "dev": "nodemon --watch src --ext ts --exec \"yarn run build && node build/\"",
-    "build": "shx rm -rf build/ && tsc",
     "start": "node build/",
     "prettier": "npx prettier \"**/*.ts\" --write",
     "mocha": "cross-env NODE_ENV=test mocha test/ --require ts-node/register --recursive --extension .ts --exit",
@@ -76,12 +76,24 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.20",
     "axios": "^1.6.7",
+    "better-sqlite3": "^9.4.3",
+    "critters": "^0.0.21",
     "cross-env": "^7.0.3",
+    "esbuild": "^0.20.1",
+    "esbuild-plugin-d.ts": "^1.2.3",
+    "esbuild-plugin-tsc": "^0.4.0",
     "mocha": "^10.3.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.9.2",
     "nodemon": "^3.1.0",
+    "oracledb": "^6.3.0",
+    "pg-query-stream": "^4.5.3",
     "prettier": "^3.2.5",
     "shx": "^0.3.4",
+    "sqlite3": "^5.1.7",
+    "tedious": "^17.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.3"
   }
 }

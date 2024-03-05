@@ -4,6 +4,14 @@ import type { TransportConnection, Application } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
 import type { AuthenticationClientOptions } from '@feathersjs/authentication-client'
 
+import { chatSessionClient } from './services/chat-session/chat-session.shared'
+export type {
+  ChatSession,
+  ChatSessionData,
+  ChatSessionQuery,
+  ChatSessionPatch
+} from './services/chat-session/chat-session.shared'
+
 import { messagesClient } from './services/messages/messages.shared'
 export type {
   Messages,
@@ -43,5 +51,6 @@ export const createClient = <Configuration = any,>(
 
   client.configure(userClient)
   client.configure(messagesClient)
+  client.configure(chatSessionClient)
   return client
 }

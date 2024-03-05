@@ -44,7 +44,7 @@ export const logger = createLogger({
       }, {})
       if (Object.keys(filteredMetadata).length !== 0) {
         // Use util.inspect for metadata, enabling colors
-        msg += `\nMetadata: ${util.inspect(filteredMetadata, { depth: null, colors: true })}`
+        msg += `${util.inspect(filteredMetadata, { depth: null, colors: true })}`
       }
       return msg
     })

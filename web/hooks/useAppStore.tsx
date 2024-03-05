@@ -9,7 +9,7 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
   const createState = create<AppState>()(
     persist(
       (set, get) => ({
-        userId: undefined,
+        userId: uuid(),
         repositories: {},
         selectedRepository: '',
         showAddRepo: false,
@@ -48,33 +48,33 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
   return createState;
 }
 
-interface AppStoreProviderProps {
-  children: ReactNode;
-  initialState: Partial<AppState>;
-}
+// interface AppStoreProviderProps {
+//   children: ReactNode;
+//   initialState: Partial<AppState>;
+// }
 
-type AppStore = ReturnType<typeof createAppStore>
-export const AppStoreContext = createContext<AppStore | undefined>(undefined);
+// type AppStore = ReturnType<typeof createAppStore>
+// export const AppStoreContext = createContext<AppStore | undefined>(undefined);
 
-export const AppStoreProvider = ({ children, initialState }: AppStoreProviderProps) => {
+// export const AppStoreProvider = ({ children, initialState }: AppStoreProviderProps) => {
 
-  const storeRef = useRef<AppStore>()
-  if (!storeRef.current) {
-    storeRef.current = createAppStore(initialState);
-  }
-  return <AppStoreContext.Provider value={storeRef.current}>{children}</AppStoreContext.Provider>;
-};
+//   const storeRef = useRef<AppStore>()
+//   if (!storeRef.current) {
+//     storeRef.current = createAppStore(initialState);
+//   }
+//   return <AppStoreContext.Provider value={storeRef.current}>{children}</AppStoreContext.Provider>;
+// };
 
 
-export function useAppStoreContext(): AppState {
-  const store = useContext(AppStoreContext);
+// export function useAppStoreContext(): AppState {
+//   const store = useContext(AppStoreContext);
 
-  if (store === undefined) {
-    throw new Error('useAppStore must be used within an AppStoreProvider');
-  }
+//   if (store === undefined) {
+//     throw new Error('useAppStore must be used within an AppStoreProvider');
+//   }
 
-  return store.getState();
-}
+//   return store.getState();
+// }
 
 
 const store = createAppStore();

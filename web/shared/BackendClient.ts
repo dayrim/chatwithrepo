@@ -1,13 +1,19 @@
-import { createClient } from "../../backend/build/client";
+import { createClient as createFeathersClient } from "../../backend/build/client";
 import io from "socket.io-client";
 import socketio from "@feathersjs/socketio-client";
 
-const socket = io(process.env.API_URL || "");
-const transportConnection = socketio(socket);
+export const createClient = (userId: string) => {
+  const options = {
+    ...(userId ? { extraHeaders: { userId } } : {}), // Conditionally add extraHeaders
+  };
 
-// socket.on("connect", () => {
-//   // Send a custom event with additional data
-//   socket.emit("additionalData", { userId: "USER_ID", browser: "BROWSER_INFO" });
-// });
+  const socket = io(process.env.API_URL || "", options);
+  const transportConnection = socketio(socket);
 
-export const client = createClient(transportConnection);
+  return createFeathersClient(transportConnection);
+};
+
+// const socket = io(process.env.API_URL || "");
+// const transportConnection = socketio(socket);
+
+// export const client = createFeathersClient(transportConnection);

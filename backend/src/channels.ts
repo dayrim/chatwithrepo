@@ -4,16 +4,14 @@ import type { AuthenticationResult } from '@feathersjs/authentication'
 import '@feathersjs/transport-commons'
 import type { Application, HookContext } from './declarations'
 import { logger } from './logger'
-import { parseCookies } from './utils'
 
 export const channels = (app: Application) => {
   app.on('connection', (connection: RealTimeConnection) => {
     logger.info('New connection', { connection })
 
-    if (connection.headers && connection.headers.cookie) {
-      const cookies = parseCookies(connection.headers.cookie)
-      const userId = cookies['userId'] // Extract userId from parsed cookies
-      logger.info('Extracted userId from cookies', { userId })
+    if (connection.headers && connection.headers['userid']) {
+      const userId = connection.headers['userid']
+      logger.info('Extracted userId from headers', { userId })
 
       if (userId) {
         const userChannel = `user/${userId}`
@@ -42,7 +40,7 @@ export const channels = (app: Application) => {
 
   app.publish((data: any, context: HookContext) => {
     logger.info('Publishing event', { method: context.method, path: context.path, data })
-    if (context.path === 'messages' && (context.method === 'patch' || context.method === 'create')) {
+    if (context.path === 'chat-session' || context.path === 'messages') {
       if (!!data?.userId) {
         logger.info('Sending to user channel', { userId: data.userId })
         return app.channel(`user/${data.userId}`)

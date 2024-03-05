@@ -13,18 +13,29 @@ services:
     volumes:
       - ~/db/data/${APP_NAME}-postgres:/var/lib/postgresql/data
 
-  server:
-    container_name: "${APP_NAME}-server"
-    image: dayrim/chatwithrepo-server:latest
+  backend:
+    container_name: "${APP_NAME}-backend"
+    image: dayrim/chatwithrepo-backend:latest
     environment:
       PORT: ${PORT}
       APP_ENV: production
       APP_NAME: ${APP_NAME}
       AUTH_SECRET: ${AUTH_SECRET}
-      NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN: ${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
-      API_URL: ${API_URL}
       POSTGRESQL_CONNECTION: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${APP_NAME}
     ports:
       - "${PORT}:${PORT}"
+    depends_on:
+      - postgres
+  web:
+    container_name: "${APP_NAME}-web"
+    image: dayrim/chatwithrepo-web:latest
+    environment:
+      PORT: ${WEB_PORT}
+      APP_ENV: production
+      APP_NAME: ${APP_NAME}
+      NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN: ${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
+      API_URL: ${API_URL}
+    ports:
+      - "${WEB_PORT}:${WEB_PORT}"
     depends_on:
       - postgres

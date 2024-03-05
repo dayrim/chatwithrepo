@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: join(__dirname, "../.env") });
 
 const nextConfig = {
+  output: "standalone",
   reactStrictMode: false,
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,

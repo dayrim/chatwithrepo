@@ -20,7 +20,7 @@ export type Repositories = {
 };
 
 export type AppState = {
-  userId: string | undefined;
+  userId: string;
   repositories: Repositories;
   selectedRepository: string;
   showAddRepo: boolean;
