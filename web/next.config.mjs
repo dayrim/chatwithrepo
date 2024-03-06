@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 
-import * as dotenv from "dotenv";
-import { join } from "path";
-import path from "path";
-import { fileURLToPath } from "url";
+// import * as dotenv from "dotenv";
+// import { join } from "path";
+// import path from "path";
+// import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: join(__dirname, "../.env") });
+// dotenv.config({ path: join(__dirname, "../.env") });
 
 const nextConfig = {
   output: "standalone",
@@ -21,6 +21,7 @@ const nextConfig = {
     APP_NAME: process.env.APP_NAME,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     API_URL: process.env.API_URL,
+    PORT: process.env.WEB_PORT,
   },
 };
 

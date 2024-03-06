@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "dotenv -e ../.env next dev",
     "build": "next build",
     "web-start": "next start",
     "lint": "next lint"
@@ -15,6 +15,7 @@
     "@isomorphic-git/lightning-fs": "^4.6.0",
     "@types/react-syntax-highlighter": "^15.5.11",
     "axios": "^1.3.5",
+    "backend": "file:../backend",
     "dotenv": "^16.0.3",
     "flowbite": "^2.3.0",
     "flowbite-react": "^0.7.2",
@@ -33,8 +34,7 @@
     "serialize": "^0.1.3",
     "socket.io-client": "^4.7.4",
     "uuid": "^9.0.0",
-    "zustand": "^4.5.1",
-    "backend": "file:../backend"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@types/mixpanel-browser": "^2.38.1",
@@ -43,6 +43,7 @@
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.1",
     "autoprefixer": "^10.0.1",
+    "dotenv-cli": "^7.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "postcss": "^8",
