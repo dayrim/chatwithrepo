@@ -29,7 +29,7 @@ WORKDIR /app
 
 # Setting the Next.js specific files and directories
 COPY --from=sourcer /app/backend ./backend
-COPY --from=sourcer /app/web/next.config.js .
+COPY --from=sourcer /app/web/next.config.mjs .
 COPY --from=sourcer /app/web/package.json .
 COPY --from=sourcer /app/web/.next/standalone ./
 COPY --from=sourcer /app/web/.next/static ./web/.next/static
