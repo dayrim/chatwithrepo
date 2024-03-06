@@ -61,6 +61,9 @@ jobs:
           tags: dayrim/chatwithrepo-web:latest
           cache-from: type=local,src=/tmp/.buildx-cache-web
           cache-to: type=local,dest=/tmp/.buildx-cache-web-new
+          build-args: |
+            NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Move Web Docker cache
         run: |
@@ -86,7 +89,7 @@ jobs:
           echo "PORT=${{ secrets.PORT }}" >> .env
           echo "NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN }}" >> .env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-          echo "API_URL=${{ secrets.API_URL }}" >> .env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
           echo "WEB_PORT=${{ secrets.WEB_PORT }}" >> .env
 
       - name: Copy docker-compose file and .env file to remote server
@@ -97,7 +100,7 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           passphrase: ${{ secrets.REMOTE_SSH_PASSPHRASE }}
           source: "./docker-compose.yml,./.env"
-          target: "~/yourprojectpath"
+          target: "~/chatwithrepo"
 
       - name: Deploy using Docker Compose
         uses: appleboy/ssh-action@master
@@ -107,7 +110,7 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           passphrase: ${{ secrets.REMOTE_SSH_PASSPHRASE }}
           script: |
-            cd ~/yourprojectpath
+            cd ~/chatwithrepo
             docker-compose pull
             docker-compose up -d
             docker-compose ps

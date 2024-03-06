@@ -21,6 +21,10 @@ WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=builder /app/out/full/ .
 COPY .gitignore .gitignore
+
+ARG NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN
+ARG NEXT_PUBLIC_API_URL
+
 RUN yarn turbo run build --scope=web --filter=web --include-dependencies --no-deps
 
 # Runner stage

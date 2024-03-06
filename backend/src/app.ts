@@ -11,10 +11,6 @@ import { postgresql } from './postgresql'
 import { authentication } from './authentication'
 import { services } from './services/index'
 import { channels } from './channels'
-import dotenv from 'dotenv'
-import path from 'path'
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 const app: Application = koa(feathers())
 

@@ -36,7 +36,7 @@
   "main": "build/client",
   "scripts": {
     "build": "shx rm -rf build/ && node esbuild.config.mjs",
-    "dev": "nodemon --watch src --ext ts --exec \"yarn run build && node build/\"",
+    "dev": "nodemon --watch src --ext ts --exec \"yarn run build && dotenv -e ../.env node build/\"",
     "start": "node build/",
     "prettier": "npx prettier \"**/*.ts\" --write",
     "mocha": "cross-env NODE_ENV=test mocha test/ --require ts-node/register --recursive --extension .ts --exit",
@@ -79,6 +79,7 @@
     "better-sqlite3": "^9.4.3",
     "critters": "^0.0.21",
     "cross-env": "^7.0.3",
+    "dotenv-cli": "^7.3.0",
     "esbuild": "^0.20.1",
     "esbuild-plugin-d.ts": "^1.2.3",
     "esbuild-plugin-tsc": "^0.4.0",
