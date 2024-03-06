@@ -22,7 +22,7 @@ WORKDIR /app
 COPY --from=installer /app/ .
 COPY --from=builder /app/out/full/ .
 COPY .gitignore .gitignore
-RUN yarn turbo run build --include-dependencies --no-deps
+RUN yarn turbo run build --scope=web --filter=web --include-dependencies --no-deps
 
 # Runner stage
 FROM node:20-alpine AS runner
