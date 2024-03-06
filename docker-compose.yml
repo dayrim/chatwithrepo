@@ -39,19 +39,3 @@ services:
       - "${WEB_PORT}:${WEB_PORT}"
     depends_on:
       - postgres
-  # web-test:
-  #   container_name: "${APP_NAME}-web-test"
-  #   build:
-  #     context: .
-  #     dockerfile: web/Dockerfile
-  #     args:
-  #         NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN: ${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
-  #         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-  #   environment:
-  #     PORT: ${WEB_PORT}
-  #     APP_ENV: production
-  #     APP_NAME: ${APP_NAME}
-  #   ports:
-  #     - "${WEB_PORT}:${WEB_PORT}"
-  #   depends_on:
-  #     - postgres
