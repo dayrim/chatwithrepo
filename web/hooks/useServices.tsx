@@ -2,7 +2,7 @@ import io from "socket.io-client";
 import socketio from "@feathersjs/socketio-client";
 import { useEffect, useMemo, useRef } from "react";
 import { createClient } from "@/shared/BackendClient";
-import { ClientApplication } from "../../backend/build/client";
+import { ClientApplication } from "backend/build/client";
 import useAppState from "@/hooks/useAppStore";
 
 function useServices() {

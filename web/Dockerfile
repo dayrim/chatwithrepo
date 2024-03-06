@@ -5,7 +5,6 @@ WORKDIR /app
 RUN yarn global add turbo
 COPY . .
 RUN turbo prune web --docker
-RUN turbo prune backend --docker
 
 # Installer stage
 FROM node:20-alpine AS installer

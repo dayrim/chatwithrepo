@@ -2,7 +2,7 @@ import { create, useStore } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuid } from 'uuid';
 import { AppState, Repositories } from '@/types/Model';
-import { Messages } from '../../backend/build/client';
+import { Messages } from 'backend/build/client';
 import React, { createContext, useContext, ReactNode, useRef } from 'react';
 
 const createAppStore = (initialState: Partial<AppState> = {}) => {

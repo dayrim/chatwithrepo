@@ -1,4 +1,4 @@
-import { Messages } from "../../backend/build/client";
+import { Messages } from "backend/build/client";
 
 export type OpenAIModel = {
   name: string;
