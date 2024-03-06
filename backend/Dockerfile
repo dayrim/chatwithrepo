@@ -25,5 +25,5 @@ RUN yarn turbo run build --scope=backend --filter=backend --include-dependencies
 
 FROM node:20-alpine as runner
 WORKDIR /app
-COPY --from=sourcer /app/ .
-CMD [ "node", "backend/build/index.js" ]
+COPY --from=sourcer /app/backend/build .
+CMD [ "node", "index.js" ]
