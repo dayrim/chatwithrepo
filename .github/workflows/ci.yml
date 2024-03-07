@@ -90,7 +90,7 @@ jobs:
           echo "NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN }}" >> .env
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
-          echo "WEB_PORT=${{ secrets.WEB_PORT }}" >> .env
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 
       - name: Copy docker-compose file and .env file to remote server
         uses: appleboy/scp-action@master
