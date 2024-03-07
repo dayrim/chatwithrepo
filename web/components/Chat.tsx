@@ -1,54 +1,59 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiSend } from "react-icons/fi";
-import { BsChevronDown, BsPlusLg } from "react-icons/bs";
+import { BsPlusLg } from "react-icons/bs";
 import { RxHamburgerMenu } from "react-icons/rx";
 import useAnalytics from "@/hooks/useAnalytics";
 import useServices from "@/hooks/useServices";
 import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
-import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
 import AddRepo from "./AddRepo";
 import NoSSR from "@/shared/NoSSR";
-import { Button, Dropdown } from "flowbite-react";
+import { Button } from "flowbite-react";
 import useAppState from "@/hooks/useAppStore";
 import RepositoryDropdown from "./RepositoryDropdown";
 import { CiCirclePlus } from "react-icons/ci";
 
 const Chat = (props: any) => {
 
-  const { messagesService } = useServices();
-  const { setMessages, setUserId, selectedRepository, setShowAddRepo, showAddRepo, repositories, userId, messages, pushMessage, updateMessageById } = useAppState();
+  const { messagesService, chatSessionsService } = useServices();
+  const { setMessages,
+    selectedRepository,
+    setShowAddRepo,
+    showAddRepo,
+    repositories,
+    userId,
+    selectedChatSessionId,
+    messages,
+    pushMessage,
+    updateMessageById } = useAppState();
+
+  const selectedChatSession = useAppState(state => state.getSelectedChatSession());
 
   const fetchMessages = useCallback(async () => {
+    if (!userId || !messagesService || !selectedChatSessionId) {
+      return;
+    }
+    try {
+      const { data: messages } = await messagesService.find({
+        query: {
+          chatSessionId: selectedChatSessionId
+        },
+      });
+      setMessages(messages);
 
-    if (messagesService) {
-      try {
-        const { data: messages } = await messagesService.find({
-          query: {
-            userId,
-          },
-        });
-        setMessages(messages);
-
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-      }
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
     }
 
-  }, [messagesService, setMessages, userId]);
+  }, [messagesService, selectedChatSessionId, setMessages, userId]);
 
   useEffect(() => {
     fetchMessages()
   }, [fetchMessages])
-  useEffect(() => {
-    if (!!messages.length) {
-      setShowEmptyChat(false);
-    }
-  }, [messages])
+
 
   useEffect(() => {
     if (!!messagesService) {
-      console.log("ADDING LISTENERS")
       messagesService.on('created', (message) => pushMessage(message))
       messagesService.on('patched', (message) => updateMessageById(message.id, message))
     }
@@ -57,7 +62,6 @@ const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showEmptyChat, setShowEmptyChat] = useState(true);
   const [message, setMessage] = useState("");
   const { trackEvent } = useAnalytics();
   const textAreaRef = useAutoResizeTextArea();
@@ -65,8 +69,6 @@ const Chat = (props: any) => {
   const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
 
 
-  console.log(messages, 'messages')
-  console.log(showEmptyChat, 'showEmptyChat')
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "24px";
@@ -82,8 +84,11 @@ const Chat = (props: any) => {
 
   const sendMessage = useCallback(async (e: any) => {
     e.preventDefault();
-    if (!userId || !messagesService) {
+    if (!userId || !messagesService || !selectedChatSessionId || !chatSessionsService) {
       return;
+    }
+    if (!selectedChatSession?.repositoryPath) {
+      chatSessionsService.patch(selectedChatSessionId, { repositoryPath: selectedRepository })
     }
     // Don't send empty messages
     if (message.length < 1) {
@@ -97,9 +102,8 @@ const Chat = (props: any) => {
     setIsLoading(true);
 
     try {
-      await messagesService.create({ text: message, userId, role: "user" });
+      await messagesService.create({ text: message, userId, role: "user", chatSessionId: selectedChatSessionId });
       setMessage("");
-      setShowEmptyChat(false);
 
       const response = await fetch(`/api/gemini`, {
         method: "POST",
@@ -108,6 +112,7 @@ const Chat = (props: any) => {
         },
         body: JSON.stringify({
           history: messages,
+          chatSessionId: selectedChatSessionId,
           message,
           userId
         }),
@@ -124,7 +129,7 @@ const Chat = (props: any) => {
       setErrorMessage(error.message);
       setIsLoading(false);
     }
-  }, [message, messages, messagesService, trackEvent, userId])
+  }, [message, messages, messagesService, selectedChatSessionId, trackEvent, userId])
 
   const handleKeypress = (e: any) => {
     // It's triggers by pressing the enter key
@@ -157,11 +162,11 @@ const Chat = (props: any) => {
           <div className="flex-1 overflow-hidden">
             <div className="react-scroll-to-bottom--css-ikyem-79elbk h-full dark:bg-white-800">
               <div className="react-scroll-to-bottom--css-ikyem-1n7m0yu">
-                {!showEmptyChat && messages.length > 0 ? (
+                {messages.length > 0 ? (
                   <div className="flex flex-col items-center text-sm bg-white-800">
                     <div className="flex w-full items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">
                       <NoSSR>
-                        <>Repository: {selectedRepository ?? ""}</>
+                        <>Repository: {selectedChatSession?.repositoryPath ?? ""}</>
                       </NoSSR>
                     </div>
                     {messages.map((message, index) => (
@@ -171,7 +176,7 @@ const Chat = (props: any) => {
                     <div ref={bottomOfChatRef}></div>
                   </div>
                 ) : null}
-                {showEmptyChat ? (
+                {messages.length === 0 ? (
                   <div className="py-10 relative w-full flex flex-col h-full">
                     <div className="flex items-center justify-center gap-2">
                       <div className="relative w-full md:w-1/2 lg:w-1/3 xl:w-1/4">

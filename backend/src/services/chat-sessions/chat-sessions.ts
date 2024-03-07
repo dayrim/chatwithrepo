@@ -11,14 +11,15 @@ import {
   chatSessionDataResolver,
   chatSessionPatchResolver,
   chatSessionQueryResolver
-} from './chat-session.schema'
+} from './chat-sessions.schema'
 
 import type { Application } from '../../declarations'
-import { ChatSessionService, getOptions } from './chat-session.class'
-import { chatSessionPath, chatSessionMethods } from './chat-session.shared'
+import { ChatSessionService, getOptions } from './chat-sessions.class'
+import { chatSessionPath, chatSessionMethods } from './chat-sessions.shared'
+import { ensureUserExists } from '../../hooks/ensure-user-exists'
 
-export * from './chat-session.class'
-export * from './chat-session.schema'
+export * from './chat-sessions.class'
+export * from './chat-sessions.schema'
 
 // A configure function that registers the service and its hooks via `app.configure`
 export const chatSession = (app: Application) => {
@@ -46,7 +47,8 @@ export const chatSession = (app: Application) => {
       get: [],
       create: [
         schemaHooks.validateData(chatSessionDataValidator),
-        schemaHooks.resolveData(chatSessionDataResolver)
+        schemaHooks.resolveData(chatSessionDataResolver),
+        ensureUserExists
       ],
       patch: [
         schemaHooks.validateData(chatSessionPatchValidator),

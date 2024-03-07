@@ -7,14 +7,6 @@ function useAnalytics() {
   const { userId } = useAppStore()
 
   useEffect(() => {
-    console.log(
-      "NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN:::" +
-      process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN
-    );
-    console.log(
-      "APP_ENV:::" +
-      process.env.APP_ENV
-    );
     if (!process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN) {
       console.error("Mixpanel project token is not set.");
       return;

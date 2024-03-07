@@ -7,7 +7,7 @@ import type {
   ChatSessionPatch,
   ChatSessionQuery,
   ChatSessionService
-} from './chat-session.class'
+} from './chat-sessions.class'
 
 export type { ChatSession, ChatSessionData, ChatSessionPatch, ChatSessionQuery }
 
@@ -16,7 +16,7 @@ export type ChatSessionClientService = Pick<
   (typeof chatSessionMethods)[number]
 >
 
-export const chatSessionPath = 'chat-session'
+export const chatSessionPath = 'chatSessions'
 
 export const chatSessionMethods = ['find', 'get', 'create', 'patch', 'remove'] as const
 

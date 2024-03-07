@@ -4,7 +4,7 @@ import { KnexService } from '@feathersjs/knex'
 import type { KnexAdapterParams, KnexAdapterOptions } from '@feathersjs/knex'
 
 import type { Application } from '../../declarations'
-import type { ChatSession, ChatSessionData, ChatSessionPatch, ChatSessionQuery } from './chat-session.schema'
+import type { ChatSession, ChatSessionData, ChatSessionPatch, ChatSessionQuery } from './chat-sessions.schema'
 
 export type { ChatSession, ChatSessionData, ChatSessionPatch, ChatSessionQuery }
 
@@ -22,6 +22,6 @@ export const getOptions = (app: Application): KnexAdapterOptions => {
   return {
     paginate: app.get('paginate'),
     Model: app.get('postgresqlClient'),
-    name: 'chat-session'
+    name: 'chatSessions'
   }
 }

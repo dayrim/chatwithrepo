@@ -5,7 +5,7 @@ import type { Static } from '@feathersjs/typebox'
 
 import type { HookContext } from '../../declarations'
 import { dataValidator, queryValidator } from '../../validators'
-import type { ChatSessionService } from './chat-session.class'
+import type { ChatSessionService } from './chat-sessions.class'
 
 // Main data model schema
 export const chatSessionSchema = Type.Object(
@@ -15,6 +15,8 @@ export const chatSessionSchema = Type.Object(
 
     // String for title
     title: Type.String(),
+
+    repositoryPath: Type.String(),
 
     // UUID string for userId, assuming it's a foreign key to a users table
     userId: Type.String({ format: 'uuid' }),
@@ -40,7 +42,7 @@ export const chatSessionDataValidator = getValidator(chatSessionDataSchema, data
 export const chatSessionDataResolver = resolve<ChatSession, HookContext<ChatSessionService>>({})
 
 // Schema for updating existing entries
-export const chatSessionPatchSchema = Type.Partial(chatSessionSchema, {
+export const chatSessionPatchSchema = Type.Pick(chatSessionSchema, ['repositoryPath'], {
   $id: 'ChatSessionPatch'
 })
 export type ChatSessionPatch = Static<typeof chatSessionPatchSchema>

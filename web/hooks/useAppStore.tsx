@@ -1,9 +1,8 @@
-import { create, useStore } from 'zustand';
+import { create, } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuid } from 'uuid';
 import { AppState, Repositories } from '@/types/Model';
-import { Messages } from 'backend/build/client';
-import React, { createContext, useContext, ReactNode, useRef } from 'react';
+import { ChatSession, Messages } from 'backend/build/client';
 
 const createAppStore = (initialState: Partial<AppState> = {}) => {
   const createState = create<AppState>()(
@@ -13,14 +12,26 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
         repositories: {},
         selectedRepository: '',
         showAddRepo: false,
+        selectedChatSessionId: undefined,
         messages: [],
+        chatSessions: [],
         setUserId: (userId: string) => set(() => ({ userId })),
+        setSelectedChatSessionId: (selectedChatSessionId: string) => set(() => ({ selectedChatSessionId })),
         setRepositories: (repositories: Repositories) => set(() => ({ repositories })),
         setSelectedRepository: (selectedRepository: string) => set(() => ({ selectedRepository })),
         setShowAddRepo: (showAddRepo: boolean) => set(() => ({ showAddRepo })),
         setMessages: (messages: Messages[]) => {
           const sortedMessages = messages.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
           set(() => ({ messages: sortedMessages }));
+        },
+        setChatSessions: (chatSessions: ChatSession[]) => {
+          const sortedChatSessions = chatSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          set(() => ({ chatSessions: sortedChatSessions }));
+        },
+        pushChatSession: (chatSession: ChatSession) => {
+          set((state) => ({
+            chatSessions: [...state.chatSessions, chatSession]
+          }));
         },
         pushMessage: (message: Messages) => {
           set((state) => ({
@@ -34,12 +45,24 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
             )
           }));
         },
+        updateChatSessionById: (id: string, updatedFields: Partial<ChatSession>) => {
+          set((state) => ({
+            chatSessions: state.chatSessions.map((chat) =>
+              chat.id === id ? { ...chat, ...updatedFields } : chat
+            )
+          }));
+        },
+        getSelectedChatSession: () => {
+          const { chatSessions, selectedChatSessionId } = get();
+          const chatSession = chatSessions.find(session => session.id === selectedChatSessionId);
+          return chatSession;
+        },
       }),
       {
         name: "app-store",
         partialize: (state) => {
-          const { messages, ...persistedState } = state;
-          return persistedState; // Persist everything except messages
+          const { selectedChatSessionId, chatSessions, messages, ...persistedState } = state;
+          return persistedState;
         },
       }
     )
@@ -47,35 +70,7 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
 
   return createState;
 }
-
-// interface AppStoreProviderProps {
-//   children: ReactNode;
-//   initialState: Partial<AppState>;
-// }
-
-// type AppStore = ReturnType<typeof createAppStore>
-// export const AppStoreContext = createContext<AppStore | undefined>(undefined);
-
-// export const AppStoreProvider = ({ children, initialState }: AppStoreProviderProps) => {
-
-//   const storeRef = useRef<AppStore>()
-//   if (!storeRef.current) {
-//     storeRef.current = createAppStore(initialState);
-//   }
-//   return <AppStoreContext.Provider value={storeRef.current}>{children}</AppStoreContext.Provider>;
-// };
-
-
-// export function useAppStoreContext(): AppState {
-//   const store = useContext(AppStoreContext);
-
-//   if (store === undefined) {
-//     throw new Error('useAppStore must be used within an AppStoreProvider');
-//   }
-
-//   return store.getState();
-// }
-
-
 const store = createAppStore();
 export default store;
+
+export const useAppState = store;

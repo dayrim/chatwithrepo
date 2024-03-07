@@ -15,6 +15,7 @@ export const messagesSchema = Type.Object(
     text: Type.String(),
     role: Type.String(),
     userId: Type.String(),
+    chatSessionId: Type.String(),
     createdAt: Type.Optional(Type.String({ format: 'date-time' })), // Optional to reflect nullable, using a string with date-time format
     updatedAt: Type.Optional(Type.String({ format: 'date-time' })) // Optional to reflect nullable, using a string with date-time format
   },
@@ -28,7 +29,7 @@ export const messagesResolver = resolve<Messages, HookContext<MessagesService>>(
 export const messagesExternalResolver = resolve<Messages, HookContext<MessagesService>>({})
 
 // Schema for creating new entries
-export const messagesDataSchema = Type.Pick(messagesSchema, ['userId', 'text', 'role'], {
+export const messagesDataSchema = Type.Pick(messagesSchema, ['userId', 'text', 'role', 'chatSessionId'], {
   $id: 'MessagesData'
 })
 
@@ -50,6 +51,7 @@ export const messagesQueryProperties = Type.Pick(messagesSchema, [
   'text',
   'userId',
   'createdAt',
+  'chatSessionId',
   'updatedAt'
 ])
 export const messagesQuerySchema = Type.Intersect(

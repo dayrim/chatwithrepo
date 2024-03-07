@@ -13,7 +13,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { history, message: initialMessage, userId } = req.body;
+  const { history, message: initialMessage, userId, chatSessionId } = req.body;
   const client = createClient(userId);
 
   console.log("Processing messages for userId:", userId); // Log the userId and initial setup
@@ -22,6 +22,7 @@ export default async function handler(
     console.log("Creating an empty message");
     const createdMessage = await client.service("messages").create({
       userId,
+      chatSessionId,
       text: "",
       role: "model",
     });

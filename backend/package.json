@@ -35,7 +35,8 @@
   ],
   "main": "build/client",
   "scripts": {
-    "build": "shx rm -rf build/ && node esbuild.config.mjs",
+    "removeBuild": "shx rm -rf build",
+    "build": "node esbuild.config.mjs",
     "dev": "nodemon --watch src --ext ts --exec \"yarn run build && dotenv -e ../.env node build/\"",
     "start": "node build/",
     "prettier": "npx prettier \"**/*.ts\" --write",

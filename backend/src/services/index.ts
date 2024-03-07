@@ -1,4 +1,4 @@
-import { chatSession } from './chat-session/chat-session'
+import { chatSession } from './chat-sessions/chat-sessions'
 import { messages } from './messages/messages'
 import { user } from './users/users'
 // For more information about this file see https://dove.feathersjs.com/guides/cli/application.html#configure-functions

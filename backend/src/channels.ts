@@ -40,7 +40,7 @@ export const channels = (app: Application) => {
 
   app.publish((data: any, context: HookContext) => {
     logger.info('Publishing event', { method: context.method, path: context.path, data })
-    if (context.path === 'chat-session' || context.path === 'messages') {
+    if (context.path === 'chatSessions' || context.path === 'messages') {
       if (!!data?.userId) {
         logger.info('Sending to user channel', { userId: data.userId })
         return app.channel(`user/${data.userId}`)

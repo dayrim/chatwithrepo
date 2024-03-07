@@ -17,25 +17,23 @@ services:
     container_name: "${APP_NAME}-backend"
     image: dayrim/chatwithrepo-backend:latest
     environment:
-      PORT: ${PORT}
+      BACKEND_PORT: ${BACKEND_PORT}
       APP_ENV: production
       APP_NAME: ${APP_NAME}
       AUTH_SECRET: ${AUTH_SECRET}
       POSTGRESQL_CONNECTION: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${APP_NAME}
     ports:
-      - "${PORT}:${PORT}"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       - postgres
   web:
     container_name: "${APP_NAME}-web"
     image: dayrim/chatwithrepo-web:latest
     environment:
-      PORT: ${WEB_PORT}
-      APP_ENV: production
-      APP_NAME: ${APP_NAME}
+      PORT: ${PORT}
       NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN: ${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
-      - "${WEB_PORT}:${WEB_PORT}"
+      - "${PORT}:${PORT}"
     depends_on:
       - postgres

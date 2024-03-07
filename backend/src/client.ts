@@ -4,13 +4,13 @@ import type { TransportConnection, Application } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
 import type { AuthenticationClientOptions } from '@feathersjs/authentication-client'
 
-import { chatSessionClient } from './services/chat-session/chat-session.shared'
+import { chatSessionClient } from './services/chat-sessions/chat-sessions.shared'
 export type {
   ChatSession,
   ChatSessionData,
   ChatSessionQuery,
   ChatSessionPatch
-} from './services/chat-session/chat-session.shared'
+} from './services/chat-sessions/chat-sessions.shared'
 
 import { messagesClient } from './services/messages/messages.shared'
 export type {
@@ -39,7 +39,7 @@ export type ClientApplication = Application<ServiceTypes, Configuration>
  * @see https://dove.feathersjs.com/api/client.html
  * @returns The Feathers client application
  */
-export const createClient = <Configuration = any,>(
+export const createClient = <Configuration = any>(
   connection: TransportConnection<ServiceTypes>,
   authenticationOptions: Partial<AuthenticationClientOptions> = {}
 ) => {
