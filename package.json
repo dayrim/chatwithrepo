@@ -16,5 +16,6 @@
   "workspaces": [
     "backend",
     "web"
-  ]
+  ],
+  "dependencies": {}
 }

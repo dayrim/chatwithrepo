@@ -10,7 +10,8 @@ function useServices() {
 
     const { userId } = useAppState();
     useEffect(() => {
-        clientRef.current = createClient(userId);
+        if (userId)
+            clientRef.current = createClient(userId);
     }, [userId]);
 
     const usersService = useMemo(() => clientRef.current && clientRef.current.service('users'), [clientRef.current]);

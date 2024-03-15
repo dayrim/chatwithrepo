@@ -8,7 +8,7 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
   const createState = create<AppState>()(
     persist(
       (set, get) => ({
-        userId: uuid(),
+        userId: undefined,
         repositories: {},
         selectedRepository: '',
         showAddRepo: false,

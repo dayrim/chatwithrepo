@@ -1,18 +1,15 @@
 import { useAppState } from "@/hooks/useAppStore";
 import useServices from "@/hooks/useServices";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
-  AiOutlineMessage,
   AiOutlinePlus,
-  AiOutlineUser,
-  AiOutlineSetting,
 } from "react-icons/ai";
-import { BiLinkExternal } from "react-icons/bi";
 import { FiMessageSquare } from "react-icons/fi";
-import { MdLogout } from "react-icons/md";
+import { MdAccountCircle, MdLogout } from "react-icons/md";
 
 const Sidebar = () => {
-  const [createdInitialChat, setCreatingInitialChat] = useState(false);
+  const isChatCreated = useRef<boolean>(false);
+
   const { chatSessionsService } = useServices();
   const {
     setChatSessions,
@@ -29,7 +26,7 @@ const Sidebar = () => {
   }, [setSelectedChatSessionId]);
 
   const handleCreateNewChat = useCallback(async () => {
-    if (chatSessionsService) {
+    if (chatSessionsService && userId) {
       chatSessionsService.create({ title: "New Conversation", userId });
 
     }
@@ -54,8 +51,8 @@ const Sidebar = () => {
           if (!selectedChatSessionId)
             setSelectedChatSessionId(fetchedChatSessions[0].id);
         } else {
-          if (!createdInitialChat) {
-            setCreatingInitialChat(true)
+          if (!isChatCreated.current) {
+            isChatCreated.current = true;
             handleCreateNewChat();
           }
 
@@ -66,7 +63,7 @@ const Sidebar = () => {
       }
     }
 
-  }, [chatSessionsService, createdInitialChat, handleCreateNewChat, selectedChatSessionId, setChatSessions, setSelectedChatSessionId, userId]);
+  }, [chatSessionsService, handleCreateNewChat, selectedChatSessionId, setChatSessions, setSelectedChatSessionId, userId]);
 
 
   useEffect(() => {
@@ -107,6 +104,10 @@ const Sidebar = () => {
           ))}
 
         </div>
+        <a className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
+          <MdAccountCircle className="h-4 w-4" />
+          Sign Up
+        </a>
         <a className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
           <MdLogout className="h-4 w-4" />
           Log out

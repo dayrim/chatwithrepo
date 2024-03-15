@@ -14,7 +14,7 @@ export type Repositories = {
 };
 
 export type AppState = {
-  userId: string;
+  userId: string | undefined;
   selectedChatSessionId: string | undefined;
   repositories: Repositories;
   chatSessions: ChatSession[];
