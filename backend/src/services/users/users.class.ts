@@ -5,6 +5,8 @@ import type { KnexAdapterParams, KnexAdapterOptions } from '@feathersjs/knex'
 
 import type { Application } from '../../declarations'
 import type { User, UserData, UserPatch, UserQuery } from './users.schema'
+import { BadRequest } from '@feathersjs/errors'
+import hashPassword from '@feathersjs/authentication-local/lib/hooks/hash-password'
 
 export type { User, UserData, UserPatch, UserQuery }
 
@@ -16,7 +18,40 @@ export class UserService<ServiceParams extends Params = UserParams> extends Knex
   UserData,
   UserParams,
   UserPatch
-> {}
+> {
+  async register({
+    userId,
+    email,
+    password
+  }: {
+    userId: string
+    email: string
+    password: string
+  }): Promise<UserData> {
+    console.log('UserService.register called', { userId, email, password })
+
+    // First, check if the user with the given userId exists and doesn't have an email
+    const user = await this.find({
+      query: {
+        id: userId
+      },
+      paginate: false
+    })
+    if (user.length > 0) {
+      if (!!user[0].email) throw new BadRequest('User is already registered.')
+
+      const updatedUser = await this.patch(userId, {
+        email,
+        password
+      })
+      console.log('UserService.register success', updatedUser)
+      return updatedUser
+    } else {
+      // Throw an error if no matching user is found or if the user already has an email
+      throw new BadRequest('User does not exist or is already registered.')
+    }
+  }
+}
 
 export const getOptions = (app: Application): KnexAdapterOptions => {
   return {

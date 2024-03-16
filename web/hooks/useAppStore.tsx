@@ -12,14 +12,21 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
         repositories: {},
         selectedRepository: '',
         showAddRepo: false,
+        isLoggedIn: false,
+        showSignUp: false,
+        showSignIn: false,
         selectedChatSessionId: undefined,
         messages: [],
         chatSessions: [],
         setUserId: (userId: string) => set(() => ({ userId })),
+        setIsLoggedIn: (isLoggedIn: boolean) => set(() => ({ isLoggedIn })),
         setSelectedChatSessionId: (selectedChatSessionId: string) => set(() => ({ selectedChatSessionId })),
         setRepositories: (repositories: Repositories) => set(() => ({ repositories })),
         setSelectedRepository: (selectedRepository: string) => set(() => ({ selectedRepository })),
         setShowAddRepo: (showAddRepo: boolean) => set(() => ({ showAddRepo })),
+        setShowSignUp: (showSignUp: boolean) => set(() => ({ showSignUp })),
+        setShowSignIn: (showSignIn: boolean) => set(() => ({ showSignIn })),
+
         setMessages: (messages: Messages[]) => {
           const sortedMessages = messages.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
           set(() => ({ messages: sortedMessages }));

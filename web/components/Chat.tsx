@@ -21,7 +21,7 @@ const Chat: React.FC<ChatProps> = ({ toggleComponentVisibility }) => {
   const { messagesService } = useServices();
   const { setMessages,
     setShowAddRepo,
-    showAddRepo,
+
     repositories,
     userId,
     selectedChatSessionId,
@@ -73,7 +73,7 @@ const Chat: React.FC<ChatProps> = ({ toggleComponentVisibility }) => {
 
   return (
     <>
-      <NoSSR><AddRepo setOpenModal={setShowAddRepo} openModal={showAddRepo}></AddRepo></NoSSR>
+
 
       <div className="flex max-w-full flex-1 flex-col">
         <div className="sticky bg-gray-800 top-0 z-10 flex items-center border-b border-white/20 bg-white-800 pl-1 pt-1 text-gray-200 sm:pl-3 md:hidden">

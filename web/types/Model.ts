@@ -20,12 +20,18 @@ export type AppState = {
   chatSessions: ChatSession[];
   selectedRepository: string;
   showAddRepo: boolean;
+  showSignIn: boolean;
+  isLoggedIn: boolean;
+  showSignUp: boolean;
   messages: Messages[];
   setSelectedChatSessionId: (selectedChatSessionId: string) => void;
   setUserId: (userId: string) => void;
+  setIsLoggedIn: (isLoggedIn: boolean) => void;
   setRepositories: (repositories: Repositories) => void;
   setSelectedRepository: (selectedRepository: string) => void;
   setShowAddRepo: (showAddRepo: boolean) => void;
+  setShowSignUp: (showSignUp: boolean) => void;
+  setShowSignIn: (showSignIn: boolean) => void;
   setMessages: (messages: Messages[]) => void;
   setChatSessions: (chatSessions: ChatSession[]) => void;
   pushMessage: (message: Messages) => void;

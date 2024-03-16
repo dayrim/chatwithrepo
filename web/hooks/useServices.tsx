@@ -17,9 +17,11 @@ function useServices() {
     const usersService = useMemo(() => clientRef.current && clientRef.current.service('users'), [clientRef.current]);
     const messagesService = useMemo(() => clientRef.current && clientRef.current.service('messages'), [clientRef.current]);
     const chatSessionsService = useMemo(() => clientRef.current && clientRef.current.service('chatSessions'), [clientRef.current]);
+    const authService = useMemo(() => clientRef.current && clientRef.current.authentication, [clientRef.current]);
 
     return {
         client: clientRef.current,
+        authService,
         usersService,
         messagesService,
         chatSessionsService

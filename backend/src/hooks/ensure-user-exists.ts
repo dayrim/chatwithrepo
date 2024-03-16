@@ -14,7 +14,7 @@ export const ensureUserExists = async (context: HookContext) => {
     })
 
     if (existingUser.length === 0) {
-      await usersService.create({ id: data.userId })
+      await usersService.create({ id: data.userId, maxTries: 3 })
     }
   }
 

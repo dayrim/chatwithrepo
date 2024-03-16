@@ -1,6 +1,24 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createClient } from "@/shared/BackendClient"; // Ensure this is correctly pointing to your FeathersJS client setup
+import axios, { AxiosResponse } from "axios";
+import { createClient } from "@/shared/BackendClient";
+import { Readable } from "stream";
+import { GenerateContentResponse } from "@google/generative-ai";
+
+interface HistoryEntry {
+  role: string;
+  text: string;
+}
+
+interface RequestBody {
+  history: HistoryEntry[];
+  message: string;
+  userId: string;
+  chatSessionId: string;
+}
+
+interface ApiResponse {
+  text: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,14 +27,22 @@ export default async function handler(
   console.log("Received request:", req.method, req.body); // Log the request method and body
 
   if (req.method !== "POST") {
-    console.log("Request method not allowed");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { history, message: initialMessage, userId, chatSessionId } = req.body;
+  const {
+    history,
+    message: initialMessage,
+    userId,
+    chatSessionId,
+  } = req.body as RequestBody;
   const client = createClient(userId);
+  console.log("Processing messages for userId:", userId); // Log the userId
 
-  console.log("Processing messages for userId:", userId); // Log the userId and initial setup
+  // Add the initial message to history as a user message
+  history.push({ role: "user", text: initialMessage });
+
+  const alternatingHistory = ensureAlternatingHistory(history);
 
   try {
     console.log("Creating an empty message");
@@ -26,65 +52,82 @@ export default async function handler(
       text: "",
       role: "model",
     });
-    const messageId = createdMessage.id; // Log the created message ID
+    const messageId = createdMessage.id as string;
     console.log("Created message ID:", messageId);
 
     console.log("Initializing Google Generative AI with model: gemini-pro");
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const API_KEY = process.env.GEMINI_API_KEY || "";
+    const payload = {
+      contents: alternatingHistory.map((entry) => ({
+        role: entry.role,
+        parts: [{ text: entry.text }],
+      })),
+    };
+    console.log("Payload:", JSON.stringify(payload));
 
-    const alternatingHistory = ensureAlternatingHistory(history);
+    const streamResponse = await axios({
+      method: "post",
+      url: `https://gemini.chatwithrepo.net/v1beta/models/gemini-pro:streamGenerateContent?key=${API_KEY}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(payload),
+      responseType: "stream",
+    });
 
-    const geminiHistory = alternatingHistory.map(({ role, text }: any) => ({
-      role,
-      parts: text,
-    }));
-    console.log("Chat history for streaming:", geminiHistory);
-    const chat = model.startChat({ history: geminiHistory });
-
-    console.log(
-      "Starting message stream with initial message:",
-      initialMessage
-    );
-    const result = await chat.sendMessageStream(initialMessage);
-
+    let buffer = "";
     let text = "";
-    for await (const chunk of result.stream) {
-      const chunkText = await chunk.text();
-      console.log("Received chunk:", chunkText);
-      text += chunkText;
-      // Update the message with new chunk
-      console.log(`Updating message ID ${messageId} with new chunk.`);
-      await client.service("messages").patch(messageId, { text });
+
+    const stream = streamResponse.data as Readable;
+    // Using an async iterator to process chunks as they arrive
+    for await (const chunk of stream) {
+      console.log(`Chunk received at: ${new Date().toISOString()}`);
+
+      buffer += chunk.toString();
+
+      // Simple extraction of "text" values and await inside the loop
+      let match;
+      const regex = /"text":\s*"((?:\\.|[^\"])*)"/g;
+      while ((match = regex.exec(buffer)) !== null) {
+        const extractedText = match[1].replace(/\\n/g, "\n");
+        console.log("Extracted text:", extractedText);
+        text += extractedText;
+        
+        await client.service("messages").patch(messageId, { text });
+      }
+
+      // Remove processed part from buffer
+      const lastIndexOfText = buffer.lastIndexOf('"text":');
+      if (lastIndexOfText !== -1) {
+        buffer = buffer.substring(lastIndexOfText);
+      }
     }
 
-    console.log("Completed streaming. Final message text:", text);
-    res.status(200).json({ message: text });
+    // Finalization after the stream ends
+    res.status(200).json({ message: "Stream processing completed" });
   } catch (error) {
     console.error("Error in handler:", error);
     res.status(500).json({ error: "An error occurred. Please try again." });
   }
 }
 
-function ensureAlternatingHistory(history: any) {
-  const alternatingHistory: any[] = [];
+function ensureAlternatingHistory(history: HistoryEntry[]): HistoryEntry[] {
+  const alternatingHistory: HistoryEntry[] = [];
   let lastRole = "model"; // Assume the last message was from the model
 
-  history.forEach((message: any, index: number) => {
+  history.forEach((message, index) => {
     if (index === 0 || message.role !== lastRole) {
       alternatingHistory.push(message);
       lastRole = message.role; // Update lastRole to the current message's role
     } else {
-      // If the current message's role is the same as the last message's role,
-      // insert a filler message with the opposite role
-      const fillerMessage = {
-        userId: message.userId,
-        text: "...", // Placeholder text or some logic to generate appropriate text
+      // Insert a filler message with the opposite role
+      const fillerMessage: HistoryEntry = {
+        text: "...",
         role: lastRole === "user" ? "model" : "user",
       };
       alternatingHistory.push(fillerMessage);
       alternatingHistory.push(message);
-      lastRole = message.role; // Update lastRole to the current message's role
+      lastRole = message.role;
     }
   });
 

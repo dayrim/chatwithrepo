@@ -14,7 +14,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('password').nullable()
     table.string('githubId').nullable()
     table.string('geminiApiKey').nullable()
-
+    table.integer('maxTries').defaultTo(0)
     // Add a 'name' column, also nullable
     table.string('name').nullable()
 

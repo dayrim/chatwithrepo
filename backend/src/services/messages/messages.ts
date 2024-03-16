@@ -17,6 +17,7 @@ import type { Application } from '../../declarations'
 import { MessagesService, getOptions } from './messages.class'
 import { messagesPath, messagesMethods } from './messages.shared'
 import { ensureUserExists } from '../../hooks/ensure-user-exists'
+import { checkAndDecrementMaxTries } from '../../hooks/check-max-tries'
 
 export * from './messages.class'
 export * from './messages.schema'
@@ -48,7 +49,8 @@ export const messages = (app: Application) => {
       create: [
         schemaHooks.validateData(messagesDataValidator),
         schemaHooks.resolveData(messagesDataResolver),
-        ensureUserExists
+        ensureUserExists,
+        checkAndDecrementMaxTries
       ],
       patch: [
         schemaHooks.validateData(messagesPatchValidator),

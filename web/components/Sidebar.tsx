@@ -5,19 +5,23 @@ import {
   AiOutlinePlus,
 } from "react-icons/ai";
 import { FiMessageSquare } from "react-icons/fi";
-import { MdAccountCircle, MdLogout } from "react-icons/md";
+import { MdAccountCircle, MdLogout, MdLogin } from "react-icons/md";
 
 const Sidebar = () => {
   const isChatCreated = useRef<boolean>(false);
 
-  const { chatSessionsService } = useServices();
+  const { chatSessionsService, authService } = useServices();
   const {
     setChatSessions,
     chatSessions,
+    setShowSignUp,
     pushChatSession,
     setSelectedChatSessionId,
     selectedChatSessionId,
     updateChatSessionById,
+    setShowSignIn,
+    isLoggedIn,
+    setIsLoggedIn,
     userId } = useAppState();
 
 
@@ -81,6 +85,14 @@ const Sidebar = () => {
       })
     }
   }, [chatSessionsService, pushChatSession, setSelectedChatSessionId, updateChatSessionById])
+
+  const handleLogout = useCallback(() => {
+    if (authService) {
+      authService.logout().then(() => {
+        setIsLoggedIn(false);
+      }).catch(error => console.error('Logout failed:', error));
+    }
+  }, [authService, setIsLoggedIn]);
   return (
     <div className="flex h-full w-full flex-1 items-start border-white/20">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-2 ">
@@ -104,16 +116,30 @@ const Sidebar = () => {
           ))}
 
         </div>
-        <a className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
-          <MdAccountCircle className="h-4 w-4" />
-          Sign Up
-        </a>
-        <a className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
-          <MdLogout className="h-4 w-4" />
-          Log out
-        </a>
+        {!isLoggedIn && (
+          <>
+            <a onClick={() => setShowSignUp(true)}
+              className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
+              <MdAccountCircle className="h-4 w-4" />
+              Sign Up
+            </a>
+            <a onClick={() => setShowSignIn(true)} // Use a similar handler for showing the sign-in form/modal
+              className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
+              <MdLogin className="h-4 w-4" />
+              Log In
+            </a>
+          </>
+        )}
+
+        {isLoggedIn && (
+          <a onClick={handleLogout}
+            className="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-gray-200 cursor-pointer text-sm">
+            <MdLogout className="h-4 w-4" />
+            Log out
+          </a>
+        )}
       </nav>
-    </div>
+    </div >
   );
 };
 

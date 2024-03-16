@@ -5,7 +5,12 @@ import MobileSiderbar from "@/components/MobileSidebar";
 import Sidebar from "@/components/Sidebar";
 import useAnalytics from "@/hooks/useAnalytics";
 import Fingerprint from "@/components/FingerPrint";
+import { useAppState } from "@/hooks/useAppStore";
+import useServices from "@/hooks/useServices";
+import AddRepo from "@/components/AddRepo";
 import NoSSR from "@/shared/NoSSR";
+import SignUp from "@/components/Signup";
+import SignIn from "@/components/SignIn";
 
 
 interface HomeProps {
@@ -15,6 +20,15 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = () => {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const { trackEvent } = useAnalytics();
+  const { authService } = useServices();
+  const {
+    setIsLoggedIn,
+    setShowSignUp,
+    setShowSignIn,
+    showSignIn,
+    showSignUp,
+    showAddRepo,
+    setShowAddRepo } = useAppState();
 
   useEffect(() => {
     trackEvent("page.view", { page: "home" });
@@ -23,10 +37,20 @@ const Home: React.FC<HomeProps> = () => {
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
   };
-
+  useEffect(() => {
+    if (authService)
+      authService.reAuthenticate()
+        .then(() => setIsLoggedIn(true))
+        .catch(error => console.error('Re-authentication failed', error));
+  }, [authService, setIsLoggedIn])
   return (
     <>
       <Fingerprint />
+
+      <NoSSR><AddRepo setOpenModal={setShowAddRepo} openModal={showAddRepo}></AddRepo></NoSSR>
+      <NoSSR><SignUp setOpenModal={setShowSignUp} openModal={showSignUp}></SignUp></NoSSR>
+      <NoSSR><SignIn setOpenModal={setShowSignIn} openModal={showSignIn}></SignIn></NoSSR>
+
       <main className="overflow-hidden w-full h-screen relative flex">
         {isComponentVisible ? (
           <MobileSiderbar toggleComponentVisibility={toggleComponentVisibility} />

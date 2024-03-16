@@ -17,6 +17,7 @@ export const userSchema = Type.Object(
     githubId: Type.Optional(Type.String()),
     geminiApiKey: Type.Optional(Type.String()),
     name: Type.Optional(Type.String()),
+    maxTries: Type.Integer(),
     created_at: Type.String({ format: 'date-time' }),
     updated_at: Type.String({ format: 'date-time' })
   },
@@ -34,9 +35,14 @@ export const userExternalResolver = resolve<User, HookContext<UserService>>({
 })
 
 // Schema for creating new entries
-export const userDataSchema = Type.Pick(userSchema, ['id', 'email', 'password', 'githubId', 'name'], {
-  $id: 'UserData'
-})
+export const userDataSchema = Type.Pick(
+  userSchema,
+  ['id', 'email', 'password', 'githubId', 'name', 'maxTries'],
+  {
+    $id: 'UserData'
+  }
+)
+
 export type UserData = Static<typeof userDataSchema>
 export const userDataValidator = getValidator(userDataSchema, dataValidator)
 export const userDataResolver = resolve<User, HookContext<UserService>>({
