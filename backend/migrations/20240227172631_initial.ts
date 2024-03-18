@@ -9,10 +9,19 @@ export async function up(knex: Knex): Promise<void> {
     // Use UUID for the ID column
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
 
+    // Add new fields for subscription management
+    table.string('subscriptionStatus').defaultTo('inactive').nullable() // e.g., active, inactive, pending
+    table.string('subscriptionType').nullable() // e.g., basic, premium
+    table.timestamp('subscriptionExpiresAt').nullable() // To track when the subscription needs renewal
+
+    // Optionally, if you want to track the Stripe customer ID for ease of management
+    table.string('stripeCustomerId').unique().nullable()
+
     // Make the existing columns nullable
     table.string('email').unique().nullable()
     table.string('password').nullable()
     table.string('githubId').nullable()
+    table.boolean('isAdmin').nullable()
     table.string('geminiApiKey').nullable()
     table.integer('maxTries').defaultTo(0)
     // Add a 'name' column, also nullable

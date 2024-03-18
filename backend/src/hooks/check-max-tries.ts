@@ -4,6 +4,7 @@ import { BadRequest } from '@feathersjs/errors'
 export const checkAndDecrementMaxTries = async (context: HookContext) => {
   const { app, data } = context
 
+  console.log(data, 'data')
   // Fetch the user to check `maxTries`
   const user = await app.service('users').get(data.userId)
 
@@ -13,7 +14,8 @@ export const checkAndDecrementMaxTries = async (context: HookContext) => {
         maxTries: user.maxTries - 1
       })
     }
-  } else {
+  } else if (user.subscriptionStatus !== 'active') {
+    console.log(user, 'user')
     // No tries left, throw error
     throw new BadRequest('No attempts left.')
   }

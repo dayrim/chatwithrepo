@@ -6,7 +6,10 @@ import type { KnexAdapterParams, KnexAdapterOptions } from '@feathersjs/knex'
 import type { Application } from '../../declarations'
 import type { User, UserData, UserPatch, UserQuery } from './users.schema'
 import { BadRequest } from '@feathersjs/errors'
-import hashPassword from '@feathersjs/authentication-local/lib/hooks/hash-password'
+import { Stripe } from 'stripe'
+import { logger } from '../../logger'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
 
 export type { User, UserData, UserPatch, UserQuery }
 
@@ -28,7 +31,7 @@ export class UserService<ServiceParams extends Params = UserParams> extends Knex
     email: string
     password: string
   }): Promise<UserData> {
-    console.log('UserService.register called', { userId, email, password })
+    logger.debug('UserService.register called', { userId, email, password })
 
     // First, check if the user with the given userId exists and doesn't have an email
     const user = await this.find({
@@ -40,11 +43,14 @@ export class UserService<ServiceParams extends Params = UserParams> extends Knex
     if (user.length > 0) {
       if (!!user[0].email) throw new BadRequest('User is already registered.')
 
+      const customer = await stripe.customers.create({ email })
+      logger.debug('Stripe customer', customer)
       const updatedUser = await this.patch(userId, {
         email,
-        password
+        password,
+        stripeCustomerId: customer.id
       })
-      console.log('UserService.register success', updatedUser)
+      logger.debug('UserService.register success', updatedUser)
       return updatedUser
     } else {
       // Throw an error if no matching user is found or if the user already has an email

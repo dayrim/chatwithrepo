@@ -8,7 +8,6 @@ import type { HookContext } from '../../declarations'
 import { dataValidator, queryValidator } from '../../validators'
 import type { UserService } from './users.class'
 
-// Main data model schema
 export const userSchema = Type.Object(
   {
     id: Type.String({ format: 'uuid' }),
@@ -18,8 +17,24 @@ export const userSchema = Type.Object(
     geminiApiKey: Type.Optional(Type.String()),
     name: Type.Optional(Type.String()),
     maxTries: Type.Integer(),
-    created_at: Type.String({ format: 'date-time' }),
-    updated_at: Type.String({ format: 'date-time' })
+    stripeCustomerId: Type.Optional(Type.String()),
+    subscriptionStatus: Type.Optional(
+      Type.Union([
+        Type.Literal('active'),
+        Type.Literal('inactive'),
+        Type.Literal('canceled'),
+        Type.Literal('incomplete'),
+        Type.Literal('incomplete_expired'),
+        Type.Literal('past_due'),
+        Type.Literal('paused'),
+        Type.Literal('trialing'),
+        Type.Literal('unpaid')
+      ])
+    ),
+    subscriptionType: Type.Optional(Type.Union([Type.Literal('basic-plan')])),
+    subscriptionExpiresAt: Type.Optional(Type.String({ format: 'date-time' })), // ISO 8601 date format
+    createdAt: Type.String({ format: 'date-time' }),
+    updatedAt: Type.String({ format: 'date-time' })
   },
   { $id: 'User', additionalProperties: false }
 )
@@ -37,7 +52,18 @@ export const userExternalResolver = resolve<User, HookContext<UserService>>({
 // Schema for creating new entries
 export const userDataSchema = Type.Pick(
   userSchema,
-  ['id', 'email', 'password', 'githubId', 'name', 'maxTries'],
+  [
+    'id',
+    'email',
+    'password',
+    'githubId',
+    'name',
+    'maxTries',
+    'stripeCustomerId',
+    'subscriptionStatus',
+    'subscriptionType',
+    'subscriptionExpiresAt'
+  ],
   {
     $id: 'UserData'
   }
@@ -58,7 +84,7 @@ export const userPatchResolver = resolve<User, HookContext<UserService>>({
 })
 
 // Schema for allowed query properties
-export const userQueryProperties = Type.Pick(userSchema, ['id', 'email', 'githubId'])
+export const userQueryProperties = Type.Pick(userSchema, ['id', 'email', 'githubId', 'stripeCustomerId'])
 export const userQuerySchema = Type.Intersect(
   [querySyntax(userQueryProperties), Type.Object({}, { additionalProperties: false })],
   { additionalProperties: false }

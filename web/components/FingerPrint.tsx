@@ -19,8 +19,8 @@ const Fingerprint = () => {
             const fingerprintUUID = convertToFingerprintUUID(fingerprint);
             setUserId(fingerprintUUID);
         };
-
-        loadClientJS();
+        if (!userId)
+            loadClientJS();
     }, []);
     return (
         <></>

@@ -1,4 +1,4 @@
-import { ChatSession, Messages } from "backend/build/client";
+import { ChatSession, Messages, UserData } from "backend/build/client";
 
 export type Repository = {
   url: string;
@@ -15,6 +15,7 @@ export type Repositories = {
 
 export type AppState = {
   userId: string | undefined;
+  userInfo: UserData | undefined;
   selectedChatSessionId: string | undefined;
   repositories: Repositories;
   chatSessions: ChatSession[];
@@ -23,14 +24,17 @@ export type AppState = {
   showSignIn: boolean;
   isLoggedIn: boolean;
   showSignUp: boolean;
+  showSubscription: boolean;
   messages: Messages[];
+  setUserInfo: (userInfo: UserData | undefined) => void;
   setSelectedChatSessionId: (selectedChatSessionId: string) => void;
-  setUserId: (userId: string) => void;
+  setUserId: (userId: string | undefined) => void;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   setRepositories: (repositories: Repositories) => void;
   setSelectedRepository: (selectedRepository: string) => void;
   setShowAddRepo: (showAddRepo: boolean) => void;
   setShowSignUp: (showSignUp: boolean) => void;
+  setShowSubscription: (showSubscription: boolean) => void;
   setShowSignIn: (showSignIn: boolean) => void;
   setMessages: (messages: Messages[]) => void;
   setChatSessions: (chatSessions: ChatSession[]) => void;

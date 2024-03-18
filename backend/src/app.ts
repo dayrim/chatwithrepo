@@ -11,12 +11,28 @@ import { postgresql } from './postgresql'
 import { authentication } from './authentication'
 import { services } from './services/index'
 import { channels } from './channels'
+import { handleStripeWebhook } from './stripeWebhooks'
 
 const app: Application = koa(feathers())
 
 // Load our app configuration (see config/ folder)
 app.configure(configuration(configurationValidator))
+app.use(async (ctx, next) => {
+  if (ctx.path !== '/stripe/webhooks') {
+    return bodyParser()(ctx, next)
+  } else {
+    return next()
+  }
+})
 
+// Stripe Webhook handler
+app.use(async (ctx, next) => {
+  if (ctx.path === '/stripe/webhooks') {
+    await handleStripeWebhook(ctx, app)
+  } else {
+    await next()
+  }
+})
 // Set up Koa middleware
 app.use(cors())
 app.use(errorHandler())
@@ -51,7 +67,5 @@ app.hooks({
   setup: [],
   teardown: []
 })
-const messages = app.service('messages')
 
-messages.on('added', (message: any) => console.log('added', message))
 export { app }

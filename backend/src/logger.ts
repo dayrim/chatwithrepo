@@ -13,20 +13,6 @@ const levels = {
   silly: 6
 }
 
-// // Custom colors for log levels
-// const colors = {
-//   error: 'red',
-//   warn: 'yellow',
-//   info: 'green',
-//   http: 'magenta',
-//   verbose: 'cyan',
-//   debug: 'blue',
-//   silly: 'grey'
-// }
-
-// // Apply the colors
-// winston.addColors(colors)
-
 export const logger = createLogger({
   levels: levels,
   level: 'silly', // Lowest level of log messages to show

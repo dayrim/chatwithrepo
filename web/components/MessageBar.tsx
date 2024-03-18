@@ -1,13 +1,16 @@
 import useAnalytics from '@/hooks/useAnalytics';
 import { useAppState } from '@/hooks/useAppStore';
 import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
+import useRepository from '@/hooks/useRepository';
 import useServices from '@/hooks/useServices';
+import { generateContent } from '@/pages/api/gemini';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FiSend } from 'react-icons/fi';
 
 
 const MessageBar = () => {
 
+    const { getRepositoryData } = useRepository();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [message, setMessage] = useState("");
@@ -18,6 +21,7 @@ const MessageBar = () => {
         selectedRepository,
         userId,
         repositories,
+        setShowSubscription,
         selectedChatSessionId,
         messages, } = useAppState();
 
@@ -58,34 +62,29 @@ const MessageBar = () => {
         setIsLoading(true);
 
         try {
+            const repositoryData = await getRepositoryData();
+
             await messagesService.create({ text: message, userId, role: "user", chatSessionId: selectedChatSessionId });
             setMessage("");
 
-            const response = await fetch(`/api/gemini`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    history: messages,
-                    chatSessionId: selectedChatSessionId,
-                    message,
-                    userId
-                }),
+            await generateContent({
+                history: messages,
+                repositoryData,
+                chatSessionId: selectedChatSessionId,
+                message,
+                userId
             });
-
-            if (!response.ok) {
-                console.error(response);
-                setErrorMessage(response.statusText);
-            }
 
             setIsLoading(false);
         } catch (error: any) {
             console.error(error);
             setErrorMessage(error.message);
             setIsLoading(false);
+            if (error.message.includes('No attempts left')) {
+                setShowSubscription(true)
+            }
         }
-    }, [chatSessionsService, message, messages, messagesService, selectedChatSession?.repositoryPath, selectedChatSessionId, selectedRepository, trackEvent, userId])
+    }, [chatSessionsService, getRepositoryData, message, messages, messagesService, selectedChatSession?.repositoryPath, selectedChatSessionId, selectedRepository, setShowSubscription, trackEvent, userId])
 
 
     const handleKeypress = (e: any) => {

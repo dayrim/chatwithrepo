@@ -35,7 +35,7 @@ export const user = (app: Application) => {
     around: {
       all: [schemaHooks.resolveExternal(userExternalResolver), schemaHooks.resolveResult(userResolver)],
       find: [authenticate('jwt')],
-      get: [authenticate('jwt')],
+      get: [],
       create: [],
       update: [authenticate('jwt')],
       patch: [authenticate('jwt')],

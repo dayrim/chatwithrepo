@@ -88,7 +88,9 @@ jobs:
           echo "AUTH_SECRET=${{ secrets.AUTH_SECRET }}" >> .env
           echo "PORT=${{ secrets.PORT }}" >> .env
           echo "NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ secrets.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN }}" >> .env
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          echo "NEXT_PUBLIC_GEMINI_API_KEY=${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
           echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
 

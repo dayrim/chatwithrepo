@@ -2,23 +2,30 @@ import { NextApiRequest, NextApiResponse } from "next";
 import axios, { AxiosResponse } from "axios";
 import { createClient } from "@/shared/BackendClient";
 import { Readable } from "stream";
-import { GenerateContentResponse } from "@google/generative-ai";
+import {
+  GenerateContentResponse,
+  GoogleGenerativeAI,
+} from "@google/generative-ai";
+import { FileJson } from "@/hooks/useRepository";
 
+export const config = {
+  // Disable the default body parser
+  api: {
+    bodyParser: false,
+  },
+};
 interface HistoryEntry {
   role: string;
   text: string;
 }
 
-interface RequestBody {
+export type RequestBody = {
   history: HistoryEntry[];
   message: string;
+  repositoryData: FileJson[];
   userId: string;
   chatSessionId: string;
-}
-
-interface ApiResponse {
-  text: string;
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,16 +33,41 @@ export default async function handler(
 ) {
   console.log("Received request:", req.method, req.body); // Log the request method and body
 
+  const body = await parseBody(req);
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  try {
+    // Finalization after the stream ends
+    await generateContent(body);
+    res.status(200).json({ message: "Stream processing completed" });
+  } catch (error) {
+    console.error("Error in handler:", error);
+    res.status(500).json({ error: "An error occurred. Please try again." });
+  }
+}
+export async function generateContent(body: RequestBody) {
+  // Assuming repositoryData is included in the request body
+  const { repositoryData } = body as RequestBody;
+
+  const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+  const genAI = new GoogleGenerativeAI(API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  console.log(`Counting tokens...`);
+  // Count tokens for the combined content of repositoryData
+  const { totalTokens } = await model.countTokens(
+    JSON.stringify(repositoryData)
+  );
+
+  console.log(`Total tokens in repositoryData: ${totalTokens}`);
 
   const {
     history,
     message: initialMessage,
     userId,
     chatSessionId,
-  } = req.body as RequestBody;
+  } = body as RequestBody;
   const client = createClient(userId);
   console.log("Processing messages for userId:", userId); // Log the userId
 
@@ -44,73 +76,71 @@ export default async function handler(
 
   const alternatingHistory = ensureAlternatingHistory(history);
 
-  try {
-    console.log("Creating an empty message");
-    const createdMessage = await client.service("messages").create({
-      userId,
-      chatSessionId,
-      text: "",
-      role: "model",
-    });
-    const messageId = createdMessage.id as string;
-    console.log("Created message ID:", messageId);
+  console.log("Creating an empty message");
+  const createdMessage = await client.service("messages").create({
+    userId,
+    chatSessionId,
+    text: "",
+    role: "model",
+  });
+  const messageId = createdMessage.id as string;
+  console.log("Created message ID:", messageId);
 
-    console.log("Initializing Google Generative AI with model: gemini-pro");
-    const API_KEY = process.env.GEMINI_API_KEY || "";
-    const payload = {
-      contents: alternatingHistory.map((entry) => ({
-        role: entry.role,
-        parts: [{ text: entry.text }],
-      })),
-    };
-    console.log("Payload:", JSON.stringify(payload));
+  const payload = {
+    contents: alternatingHistory.map((entry) => ({
+      role: entry.role,
+      parts: [{ text: entry.text }],
+    })),
+  };
+  console.log("Payload:", JSON.stringify(payload));
 
-    const streamResponse = await axios({
-      method: "post",
-      url: `https://gemini.chatwithrepo.net/v1beta/models/gemini-pro:streamGenerateContent?key=${API_KEY}`,
+  const response = await fetch(
+    `https://gemini.chatwithrepo.net/v1beta/models/gemini-pro:streamGenerateContent?key=${API_KEY}`,
+    {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      data: JSON.stringify(payload),
-      responseType: "stream",
-    });
+      body: JSON.stringify(payload),
+    }
+  );
 
-    let buffer = "";
-    let text = "";
+  if (!response.body) {
+    throw new Error("Failed to get readable stream");
+  }
 
-    const stream = streamResponse.data as Readable;
-    // Using an async iterator to process chunks as they arrive
-    for await (const chunk of stream) {
-      console.log(`Chunk received at: ${new Date().toISOString()}`);
+  let reader = response.body.getReader();
+  let decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
 
-      buffer += chunk.toString();
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+    const chunk = decoder.decode(value, { stream: true });
+    console.log(`Chunk received: ${new Date().toISOString()}`);
 
-      // Simple extraction of "text" values and await inside the loop
-      let match;
-      const regex = /"text":\s*"((?:\\.|[^\"])*)"/g;
-      while ((match = regex.exec(buffer)) !== null) {
-        const extractedText = match[1].replace(/\\n/g, "\n");
-        console.log("Extracted text:", extractedText);
-        text += extractedText;
-        
-        await client.service("messages").patch(messageId, { text });
-      }
+    buffer += chunk;
 
-      // Remove processed part from buffer
-      const lastIndexOfText = buffer.lastIndexOf('"text":');
-      if (lastIndexOfText !== -1) {
-        buffer = buffer.substring(lastIndexOfText);
-      }
+    // Simple extraction of "text" values
+    let match;
+    const regex = /"text":\s*"((?:\\.|[^\"])*)"/g;
+    while ((match = regex.exec(buffer)) !== null) {
+      const extractedText = match[1].replace(/\\n/g, "\n");
+      console.log("Extracted text:", extractedText);
+      text += extractedText;
+      await client.service("messages").patch(messageId, { text });
     }
 
-    // Finalization after the stream ends
-    res.status(200).json({ message: "Stream processing completed" });
-  } catch (error) {
-    console.error("Error in handler:", error);
-    res.status(500).json({ error: "An error occurred. Please try again." });
+    // Remove processed part from buffer
+    const lastIndexOfText = buffer.lastIndexOf('"text":');
+    if (lastIndexOfText !== -1) {
+      buffer = buffer.substring(lastIndexOfText);
+    }
   }
 }
-
 function ensureAlternatingHistory(history: HistoryEntry[]): HistoryEntry[] {
   const alternatingHistory: HistoryEntry[] = [];
   let lastRole = "model"; // Assume the last message was from the model
@@ -132,4 +162,24 @@ function ensureAlternatingHistory(history: HistoryEntry[]): HistoryEntry[] {
   });
 
   return alternatingHistory;
+}
+
+async function parseBody(req: NextApiRequest): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let rawData = "";
+    req.on("data", (chunk) => {
+      rawData += chunk;
+      // Optional: Add checks here to reject the promise if the size exceeds your limit
+    });
+    req.on("end", () => {
+      try {
+        // Assuming JSON content, adjust if needed
+        const parsedData = JSON.parse(rawData);
+        resolve(parsedData);
+      } catch (error) {
+        reject(new Error("Error parsing JSON body"));
+      }
+    });
+    req.on("error", (error) => reject(error));
+  });
 }

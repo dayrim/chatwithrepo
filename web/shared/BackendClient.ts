@@ -2,7 +2,7 @@ import { createClient as createFeathersClient } from "backend/build/client";
 import io from "socket.io-client";
 import socketio from "@feathersjs/socketio-client";
 
-export const createClient = (userId: string) => {
+export const createClient = (userId?: string | undefined) => {
   const options = {
     ...(userId ? { extraHeaders: { userId } } : {}),
   };
@@ -10,5 +10,6 @@ export const createClient = (userId: string) => {
   const socket = io(process.env.NEXT_PUBLIC_API_URL || "", options);
   const transportConnection = socketio(socket);
 
-  return createFeathersClient(transportConnection);
+  const client = createFeathersClient(transportConnection);
+  return client;
 };

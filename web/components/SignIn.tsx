@@ -20,7 +20,7 @@ const SignIn: React.FC<SignInProps> = ({ openModal, setOpenModal }) => {
     const [submitError, setSubmitError] = useState('');
 
     const { authService } = useServices();
-    const { setIsLoggedIn } = useAppState();
+    const { setIsLoggedIn, setUserId } = useAppState();
 
     const formik = useFormik({
         initialValues: { email: '', password: '' },
@@ -29,13 +29,10 @@ const SignIn: React.FC<SignInProps> = ({ openModal, setOpenModal }) => {
             setSubmitError(''); // Reset submit error
             if (authService) {
                 try {
-                    // Perform the authentication using the authService
                     await authService.authenticate({
                         strategy: 'local',
                         ...values,
                     });
-                    setIsLoggedIn(true);
-                    setOpenModal(false); // Close the modal on successful sign in
                 } catch (error: any) {
                     console.error('Error signing in:', error);
                     // Handle specific or general authentication errors
