@@ -3,7 +3,6 @@ import { feathers } from '@feathersjs/feathers'
 import configuration from '@feathersjs/configuration'
 import { koa, rest, bodyParser, errorHandler, parseAuthentication, cors, serveStatic } from '@feathersjs/koa'
 import socketio from '@feathersjs/socketio'
-import { Context } from 'koa' // Ensure you have the correct type import for Context
 
 import { configurationValidator } from './configuration'
 import type { Application } from './declarations'
@@ -42,23 +41,13 @@ app.use(bodyParser())
 
 // Configure services and transports
 app.configure(rest())
-app.use(
-  cors({
-    origin: (ctx: Context): Promise<string> => {
-      const allowedOrigins = app.get('origins')
-      const requestOrigin = ctx.request.header.origin
-
-      return new Promise((resolve, reject) => {
-        if (allowedOrigins && requestOrigin && allowedOrigins.includes(requestOrigin)) {
-          resolve(requestOrigin)
-        } else {
-          reject()
-        }
-      })
+app.configure(
+  socketio({
+    cors: {
+      origin: app.get('origins')
     }
   })
 )
-
 app.configure(postgresql)
 app.configure(authentication)
 app.configure(services)
