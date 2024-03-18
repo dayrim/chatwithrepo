@@ -5,7 +5,8 @@
     "http://localhost:3030",
     "http://localhost:3000",
     "http://localhost:3099",
-    "https://chatwithrepo.net"
+    "https://chatwithrepo.net",
+    "https://api.chatwithrepo.net"
   ],
   "paginate": {
     "default": 10,
