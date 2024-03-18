@@ -49,7 +49,6 @@ const Home: React.FC<HomeProps> = () => {
     if (authService)
       authService.reAuthenticate()
         .then((auth) => {
-          console.log(auth.user, 'user from auth')
           setIsLoggedIn(true)
           setUserInfo(auth.user)
           setUserId(auth.user.id)
@@ -86,8 +85,6 @@ const Home: React.FC<HomeProps> = () => {
   }, [setUserInfo, usersService])
 
   useEffect(() => {
-    // console.log(userInfo && userInfo.maxTries === 0 && userInfo.subscriptionStatus !== "active")
-    console.log(userInfo, 'userInfo before show subscribe')
     if (userInfo && userInfo.maxTries === 0 && userInfo.subscriptionStatus !== "active") {
       setShowSubscription(true);
     } else {
