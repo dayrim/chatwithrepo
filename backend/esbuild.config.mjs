@@ -19,7 +19,7 @@ esbuild
         // Specify assets to be copied
         assets: {
           from: ['config/*'], // Matches all files in the 'config' directory
-          to: ['build/config'] // Copies them to 'build/config'
+          to: ['config'] // Copies them to 'build/config'
         }
       })
     ]
