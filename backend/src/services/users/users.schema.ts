@@ -60,6 +60,7 @@ export const userDataSchema = Type.Pick(
     'githubId',
     'name',
     'maxTries',
+    'isAdmin',
     'stripeCustomerId',
     'subscriptionStatus',
     'subscriptionType',
