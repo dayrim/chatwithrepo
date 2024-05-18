@@ -3,16 +3,19 @@ import { FiCopy } from "react-icons/fi";
 import { HiAcademicCap } from "react-icons/hi";
 import { HiUser } from "react-icons/hi";
 import { TbCursorText } from "react-icons/tb";
-// Instead of importing from 'react-syntax-highlighter/dist/esm/...', use:
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { atomDark, dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 const decodeUnicode = (str: string) => {
   return str.replace(/\\u[\dA-F]{4}/gi,
-    (match: string) => String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16)));
+    (match: string) => String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16)))
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\r/g, '\n')
+    .replace(/\\n/g, '\n');
 };
+
 const CodeBlock = ({ language, code }: any) => {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -26,7 +29,7 @@ const CodeBlock = ({ language, code }: any) => {
   // @ts-ignore
   return (
     <div className="relative group">
-      <SyntaxHighlighter language={language} style={atomDark} customStyle={{
+      <SyntaxHighlighter language={language} customStyle={{
         padding: '1rem',
         borderRadius: '0.5rem',
         marginBottom: '1rem',
@@ -35,14 +38,13 @@ const CodeBlock = ({ language, code }: any) => {
       </SyntaxHighlighter>
       <button
         onClick={() => copyToClipboard(decodedCode)}
-        className="absolute right-2 top-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute right-2 top-2 text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         {isCopied ? 'Copied' : <FiCopy />}
       </button>
     </div>
   );
 };
-
 
 const Message = (props: any) => {
   const { message } = props;
@@ -55,11 +57,12 @@ const Message = (props: any) => {
   const renderSegment = (segment: any, index: any) => {
     const codeMatch = segment.match(/```(\w*)\n([\s\S]*?)\n```/);
     if (codeMatch) {
+      console.log(codeMatch, 'codeMatch')
       const [, language, code] = codeMatch;
       return <CodeBlock key={`code-${index}`} language={language} code={code} />;
     }
-    // Render regular text if not a code block
-    return <Markdown key={`markdown-${index}`} className={'markdown'} remarkPlugins={[remarkGfm]}>{segment}</Markdown>;
+
+    return <Markdown key={`markdown-${index}`} className={'markdown'} remarkPlugins={[remarkGfm]}>{decodeUnicode(segment)}</Markdown>;
   };
 
   return (
