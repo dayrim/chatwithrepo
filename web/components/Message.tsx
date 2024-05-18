@@ -9,7 +9,10 @@ import { atomDark, dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-
+const decodeUnicode = (str: string) => {
+  return str.replace(/\\u[\dA-F]{4}/gi,
+    (match: string) => String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16)));
+};
 const CodeBlock = ({ language, code }: any) => {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -18,6 +21,9 @@ const CodeBlock = ({ language, code }: any) => {
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
   };
+  const decodedCode = decodeUnicode(code);
+
+  // @ts-ignore
   return (
     <div className="relative group">
       <SyntaxHighlighter language={language} style={atomDark} customStyle={{
@@ -25,10 +31,10 @@ const CodeBlock = ({ language, code }: any) => {
         borderRadius: '0.5rem',
         marginBottom: '1rem',
       }}>
-        {code}
+        {decodedCode}
       </SyntaxHighlighter>
       <button
-        onClick={() => copyToClipboard(code)}
+        onClick={() => copyToClipboard(decodedCode)}
         className="absolute right-2 top-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         {isCopied ? 'Copied' : <FiCopy />}

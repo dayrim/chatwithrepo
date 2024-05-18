@@ -1,12 +1,10 @@
 import useAnalytics from '@/hooks/useAnalytics';
 import { useAppState } from '@/hooks/useAppStore';
 import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
-import useRepository from '@/hooks/useRepository';
 import useBackendClient from '@/hooks/useBackendClient';
-import { generateContent } from '@/pages/api/gemini';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { RespoitoryFile } from 'backend';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiSend } from 'react-icons/fi';
-
 
 const MessageBar = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -21,10 +19,10 @@ const MessageBar = () => {
         repositories,
         setShowSubscription,
         selectedChatSessionId,
-        messages, } = useAppState();
+        messages,
+    } = useAppState();
 
-
-    const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
+    const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories]);
 
     const textAreaRef = useAutoResizeTextArea();
     useEffect(() => {
@@ -33,6 +31,7 @@ const MessageBar = () => {
             textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
         }
     }, [message, textAreaRef]);
+
     useEffect(() => {
         if (bottomOfChatRef.current) {
             bottomOfChatRef.current.scrollIntoView({ behavior: "smooth" });
@@ -44,7 +43,6 @@ const MessageBar = () => {
         if (!userId || !messagesService || !selectedChatSessionId || !chatSessionsService || !repositoryFilesService) {
             return;
         }
-        // Don't send empty messages
         if (message.length < 1) {
             setErrorMessage("Please enter a message.");
             return;
@@ -56,17 +54,20 @@ const MessageBar = () => {
         setIsLoading(true);
 
         try {
-
             await messagesService.create({ text: message, userId, role: "user", chatSessionId: selectedChatSessionId });
             setMessage("");
-            // const files = await repositoryFilesService.find({
-            //     paginate: false,
-            //     query: {
-            //         repositoryId: selectedRepositoryId,
-            //         $limit: -1
-            //     },
 
-            // });
+            let files: RespoitoryFile[] = [];
+
+            const fetchedFiles = await repositoryFilesService.find({
+                paginate: false,
+                query: {
+                    repositoryId: selectedRepositoryId,
+                    $limit: -1
+                }
+            });
+            files = fetchedFiles;
+
             const response = await fetch(`/api/gemini`, {
                 method: "POST",
                 headers: {
@@ -74,7 +75,7 @@ const MessageBar = () => {
                 },
                 body: JSON.stringify({
                     history: messages,
-                    files: [],
+                    files: files.map(file => ({ fileUrl: file.googleFileUrl || "" })),
                     chatSessionId: selectedChatSessionId,
                     message,
                     userId
@@ -86,37 +87,35 @@ const MessageBar = () => {
                 setErrorMessage(response.statusText);
             }
 
-            // await generateContent({
-            //     history: messages,
-            //     files: files.map(file => ({ fileUrl: file.googleFileUrl || "" })),
-            //     chatSessionId: selectedChatSessionId,
-            //     message,
-            //     userId
-            // });
-
             setIsLoading(false);
         } catch (error: any) {
             console.error(error);
             setErrorMessage(error.message);
             setIsLoading(false);
             if (error.message.includes('No attempts left')) {
-                setShowSubscription(true)
+                setShowSubscription(true);
             }
         }
-    }, [chatSessionsService,
+    }, [
+        chatSessionsService,
         message,
         messages,
         messagesService,
-        repositoryFilesService, selectedChatSessionId, selectedRepositoryId, setShowSubscription, trackEvent, userId])
-
+        repositoryFilesService,
+        selectedChatSessionId,
+        selectedRepositoryId,
+        setShowSubscription,
+        trackEvent,
+        userId
+    ]);
 
     const handleKeypress = (e: any) => {
-        // It's triggers by pressing the enter key
         if (e.keyCode == 13 && !e.shiftKey) {
             sendMessage(e);
             e.preventDefault();
         }
     };
+
     return (
         <>
             <form className="stretch mx-2 flex flex-row gap-3 last:mb-2 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-2xl xl:max-w-3xl">
@@ -140,7 +139,6 @@ const MessageBar = () => {
                                     maxHeight: "200px",
                                     overflowY: "hidden",
                                 }}
-                                // rows={1}
                                 placeholder="Send a message..."
                                 className="m-0 w-full resize-none border-0 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent pl-2 md:pl-0"
                                 onChange={(e) => setMessage(e.target.value)}
@@ -155,11 +153,10 @@ const MessageBar = () => {
                             </button>
                         </div>
                     )}
-
                 </div>
             </form>
         </>
-    )
-}
+    );
+};
 
-export default MessageBar
+export default MessageBar;

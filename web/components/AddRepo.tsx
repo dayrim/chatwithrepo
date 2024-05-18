@@ -1,7 +1,7 @@
 'use client'
 import React, { useMemo, useState } from 'react';
 import { Button, Modal, TextInput, Progress } from 'flowbite-react';
-import git from 'isomorphic-git';
+import git, { AuthCallback, AuthFailureCallback, AuthSuccessCallback, CallbackFsClient, HttpClient, MessageCallback, ProgressCallback, PromiseFsClient } from 'isomorphic-git';
 import LightningFS from '@isomorphic-git/lightning-fs';
 import http from 'isomorphic-git/http/web';
 import useAppState from '@/hooks/useAppStore';
@@ -17,6 +17,8 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
     const { pushRepository, repositories, setSelectedRepositoryId, userId } = useAppState();
     const { repositoriesService, chatSessionsService, repositoryFilesService } = useBackendClient();
     const [repoLink, setRepoLink] = useState('');
+    const [username, setUsername] = useState('');
+    const [accessToken, setAccessToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [phase, setPhase] = useState('Chilling');
@@ -40,30 +42,64 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
 
         const dir = `/github/${owner}/${repo}`;
         const url = `https://github.com/${owner}/${repo}.git`;
+
+        const cloneOptions: {
+            fs: CallbackFsClient | PromiseFsClient;
+            http: HttpClient;
+            onProgress?: ProgressCallback;
+            onMessage?: MessageCallback;
+            onAuth?: AuthCallback;
+            onAuthFailure?: AuthFailureCallback;
+            onAuthSuccess?: AuthSuccessCallback;
+            dir: string;
+            gitdir?: string;
+            url: string;
+            corsProxy?: string;
+            ref?: string;
+            singleBranch?: boolean;
+            noCheckout?: boolean;
+            noTags?: boolean;
+            remote?: string;
+            depth?: number;
+            since?: Date;
+            exclude?: string[];
+            relative?: boolean;
+            headers?: {
+                [x: string]: string;
+            };
+            cache?: any;
+        } = {
+            fs,
+            http,
+            dir,
+            corsProxy: 'https://cors.isomorphic-git.org',
+            url,
+            singleBranch: true,
+            depth: 1,
+            onProgress: event => {
+                console.log(event);
+                setPhase(event.phase);
+                if (event.total) {
+                    setProgress((event.loaded / event.total) * 100);
+                } else {
+                    setProgress(event.loaded);
+                }
+            },
+
+        };
+
+        if (username && accessToken) {
+            cloneOptions['onAuth'] = () => ({
+                username,
+                password: accessToken,
+            });
+        }
+
         try {
             console.log('Cloning repository:', dir);
-            await git.clone({
-                fs,
-                http,
-                dir,
-                corsProxy: 'https://cors.isomorphic-git.org',
-                url,
-                singleBranch: true,
-                depth: 1,
-                onProgress: event => {
-                    console.log(event)
-                    console.log(event.loaded)
-                    setPhase(event.phase)
-                    if (event.total) {
-                        setProgress(event.loaded / event.total)
-                    } else {
-                        setProgress(event.loaded)
-                    }
-                }
-            });
+            await git.clone(cloneOptions);
             const createdRepo = await repositoriesService.create({ provider: 'github', domain: owner, repoName: repo, userId });
             console.log('Repository cloned successfully.');
-
 
             const filesInRepo = await git.listFiles({ fs, dir });
             const totalFiles = filesInRepo.length;
@@ -81,7 +117,7 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                         content = new TextDecoder('utf-8').decode(content);
                     }
                     try {
-                        const responce = await fetch('/api/gemini-upload-file', {
+                        const response = await fetch('/api/gemini-upload-file', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -91,10 +127,10 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                                 fileContent: content,
                             }),
                         });
-                        if (!responce.ok) {
+                        if (!response.ok) {
                             console.error('File upload response was not ok for file: ' + filePath);
                         }
-                        const result = await responce.json() as UploadResponse;
+                        const result = await response.json() as UploadResponse;
 
                         if (!result?.file) {
                             console.error('Data missing for file: ' + filePath)
@@ -106,7 +142,7 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                             await repositoryFilesService.create({
                                 repositoryId: createdRepo.id, filePath: file.displayName, googleFileName: file.name,
                                 googleFileUrl: file.uri, sha256Hash: file.sha256Hash
-                            })
+                            });
                         } catch (err) {
                             console.error('Error creating repository file:', err);
                         }
@@ -114,22 +150,19 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                         const uploadProgress = (uploadedFiles / totalFiles) * 100;
                         setProgress(uploadProgress);
 
-                    }
-                    catch (err) {
+                    } catch (err) {
                         console.error('Error uploading file:', err);
                     }
-
 
                     return { name: filePath, path: filePath, content };
                 }),
             );
             await chatSessionsService.create({ title: "New Conversation", userId, repositoryId: createdRepo.id });
 
-            pushRepository(createdRepo)
-            setSelectedRepositoryId(createdRepo.id)
+            pushRepository(createdRepo);
+            setSelectedRepositoryId(createdRepo.id);
             setOpenModal(false);
             setLoading(false);
-
 
         } catch (error) {
             setLoading(false);
@@ -147,14 +180,16 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
             <Modal show={openModal} onClose={() => setOpenModal(false)}>
                 <Modal.Header>Add New Repository</Modal.Header>
                 <Modal.Body>
-                    {loading ? <>
-                        <div className="space-y-2">
-                            <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {phase || "Chilling..."}
-                            </span>
-                            <Progress progress={progress} />
-                        </div></>
-                        :
+                    {loading ? (
+                        <>
+                            <div className="space-y-2">
+                                <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {phase || "Chilling..."}
+                                </span>
+                                <Progress progress={progress} />
+                            </div>
+                        </>
+                    ) : (
                         <>
                             <div className="space-y-6">
                                 <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
@@ -167,9 +202,23 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                                     value={repoLink}
                                     onChange={(e) => setRepoLink(e.target.value)}
                                 />
+                                <TextInput
+                                    id="username"
+                                    type="text"
+                                    placeholder="GitHub Username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+                                <TextInput
+                                    id="accessToken"
+                                    type="password"
+                                    placeholder="GitHub Access Token"
+                                    value={accessToken}
+                                    onChange={(e) => setAccessToken(e.target.value)}
+                                />
                             </div>
-                        </>}
-
+                        </>
+                    )}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button color="dark" disabled={loading} onClick={handleSubmit}>Add Repository</Button>

@@ -78,15 +78,21 @@ export async function generateContent(body: RequestBody) {
 
   console.log(files, "Files length");
   const payload = {
-    contents: alternatingHistory.map((entry) => ({
-      role: entry.role,
-      parts: [
-        { text: entry.text },
-        files.map(({ fileUrl }) => ({
-          file_data: { file_uri: fileUrl, mime_type: "text/plain" },
-        })),
-      ],
-    })),
+    contents: alternatingHistory.map((entry, index) => {
+      const result = {
+        role: entry.role,
+        parts: [
+          { text: entry.text },
+          index === alternatingHistory.length - 1
+            ? files.map(({ fileUrl }) => ({
+                file_data: { file_uri: fileUrl, mime_type: "text/plain" },
+              }))
+            : [],
+        ],
+      };
+
+      return result;
+    }),
   };
   console.log("Payload:", JSON.stringify(payload));
 
