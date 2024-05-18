@@ -14,9 +14,7 @@ export const checkAndDecrementMaxTries = async (context: HookContext) => {
         maxTries: user.maxTries - 1
       })
     }
-  } else if (user.subscriptionStatus !== 'active') {
-    console.log(user, 'user')
-    // No tries left, throw error
+  } else if (user.subscriptionStatus !== 'active' && !user.isAdmin) {
     throw new BadRequest('No attempts left.')
   }
 
