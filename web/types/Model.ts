@@ -1,25 +1,17 @@
-import { ChatSession, Messages, UserData } from "backend/build/client";
-
-export type Repository = {
-  url: string;
-  dir: string;
-  repo: string;
-  owner: string;
-  provider: "github";
-  selfHosted: boolean;
-};
-
-export type Repositories = {
-  [key: string]: Repository;
-};
+import {
+  ChatSession,
+  Messages,
+  UserData,
+  Repository,
+} from "backend/build/client";
 
 export type AppState = {
   userId: string | undefined;
   userInfo: UserData | undefined;
   selectedChatSessionId: string | undefined;
-  repositories: Repositories;
+  repositories: Repository[];
   chatSessions: ChatSession[];
-  selectedRepository: string;
+  selectedRepositoryId: string;
   showAddRepo: boolean;
   showSignIn: boolean;
   isLoggedIn: boolean;
@@ -30,8 +22,8 @@ export type AppState = {
   setSelectedChatSessionId: (selectedChatSessionId: string) => void;
   setUserId: (userId: string | undefined) => void;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
-  setRepositories: (repositories: Repositories) => void;
-  setSelectedRepository: (selectedRepository: string) => void;
+  pushRepository: (repository: Repository) => void;
+  setSelectedRepositoryId: (selectedRepository: string) => void;
   setShowAddRepo: (showAddRepo: boolean) => void;
   setShowSignUp: (showSignUp: boolean) => void;
   setShowSubscription: (showSubscription: boolean) => void;
@@ -42,6 +34,7 @@ export type AppState = {
   pushChatSession: (chatSession: ChatSession) => void;
   updateMessageById: (id: string, updatedFields: Partial<Messages>) => void;
   getSelectedChatSession: () => ChatSession | undefined;
+  getSelectedRepository: () => Repository | undefined;
   updateChatSessionById: (
     id: string,
     updatedFields: Partial<ChatSession>

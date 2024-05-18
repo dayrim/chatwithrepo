@@ -1,5 +1,5 @@
 import { useAppState } from "@/hooks/useAppStore";
-import useServices from "@/hooks/useServices";
+import useBackendClient from "@/hooks/useBackendClient";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   AiOutlinePlus,
@@ -10,7 +10,7 @@ import { MdAccountCircle, MdLogout, MdLogin } from "react-icons/md";
 const Sidebar = () => {
   const isChatCreated = useRef<boolean>(false);
 
-  const { chatSessionsService, authService } = useServices();
+  const { chatSessionsService, authService } = useBackendClient();
   const {
     setChatSessions,
     chatSessions,
@@ -18,6 +18,7 @@ const Sidebar = () => {
     pushChatSession,
     setSelectedChatSessionId,
     selectedChatSessionId,
+    selectedRepositoryId,
     updateChatSessionById,
     setShowSignIn,
     isLoggedIn,
@@ -30,11 +31,12 @@ const Sidebar = () => {
   }, [setSelectedChatSessionId]);
 
   const handleCreateNewChat = useCallback(async () => {
-    if (chatSessionsService && userId) {
-      chatSessionsService.create({ title: "New Conversation", userId });
+    if (chatSessionsService && userId && selectedRepositoryId) {
+      console.log(selectedRepositoryId, 'selectedRepositoryId')
+      chatSessionsService.create({ title: "New Conversation", userId, repositoryId: selectedRepositoryId });
 
     }
-  }, [chatSessionsService, userId]);
+  }, [chatSessionsService, selectedRepositoryId, userId]);
 
   const fetchChatSessions = useCallback(async () => {
     if (chatSessionsService) {

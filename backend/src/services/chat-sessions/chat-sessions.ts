@@ -17,6 +17,8 @@ import type { Application } from '../../declarations'
 import { ChatSessionService, getOptions } from './chat-sessions.class'
 import { chatSessionPath, chatSessionMethods } from './chat-sessions.shared'
 import { ensureUserExists } from '../../hooks/ensure-user-exists'
+import { includeRepositoryInfo } from '../../hooks/include-repository-info'
+import { disablePagination } from '../../hooks/disable-pagination'
 
 export * from './chat-sessions.class'
 export * from './chat-sessions.schema'
@@ -43,7 +45,7 @@ export const chatSession = (app: Application) => {
         schemaHooks.validateQuery(chatSessionQueryValidator),
         schemaHooks.resolveQuery(chatSessionQueryResolver)
       ],
-      find: [],
+      find: [disablePagination],
       get: [],
       create: [
         schemaHooks.validateData(chatSessionDataValidator),
@@ -57,7 +59,13 @@ export const chatSession = (app: Application) => {
       remove: []
     },
     after: {
-      all: []
+      all: [],
+      find: [includeRepositoryInfo], // Apply the hook after 'find' to modify the result
+      get: [],
+      create: [includeRepositoryInfo], // Include repository info after creating a chat session
+      update: [],
+      patch: [includeRepositoryInfo], // Include repository info after patching a chat session
+      remove: []
     },
     error: {
       all: []

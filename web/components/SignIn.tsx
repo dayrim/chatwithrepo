@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, Modal, TextInput } from 'flowbite-react';
 import { useAppState } from '@/hooks/useAppStore';
-import useServices from '@/hooks/useServices';
+import useBackendClient from '@/hooks/useBackendClient';
 
 // Define a schema for the user inputs using Yup
 const signInValidationSchema = yup.object({
@@ -19,8 +19,8 @@ interface SignInProps {
 const SignIn: React.FC<SignInProps> = ({ openModal, setOpenModal }) => {
     const [submitError, setSubmitError] = useState('');
 
-    const { authService } = useServices();
-    const { setIsLoggedIn, setUserId } = useAppState();
+    const { authService } = useBackendClient();
+    const { setIsLoggedIn, setUserId, setUserInfo } = useAppState();
 
     const formik = useFormik({
         initialValues: { email: '', password: '' },
@@ -29,10 +29,14 @@ const SignIn: React.FC<SignInProps> = ({ openModal, setOpenModal }) => {
             setSubmitError(''); // Reset submit error
             if (authService) {
                 try {
-                    await authService.authenticate({
+                    const auth = await authService.authenticate({
                         strategy: 'local',
                         ...values,
                     });
+                    setIsLoggedIn(true)
+                    setUserInfo(auth.user)
+                    setUserId(auth.user.id)
+                    setOpenModal(false);
                 } catch (error: any) {
                     console.error('Error signing in:', error);
                     // Handle specific or general authentication errors

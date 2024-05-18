@@ -4,7 +4,8 @@
   "scripts": {
     "build": "turbo build",
     "start": "turbo start",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "migrate": "turbo run migrate --filter=backend"
   },
   "devDependencies": {
     "turbo": "latest"

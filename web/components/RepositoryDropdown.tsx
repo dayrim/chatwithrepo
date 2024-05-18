@@ -6,8 +6,12 @@ import { BsChevronDown } from 'react-icons/bs';
 
 
 const RepositoryDropdown: React.FC = () => {
-    const { repositories, setSelectedRepository, selectedRepository, showAddRepo, setShowAddRepo } = useAppState();
-    const label = useMemo(() => !!selectedRepository ? selectedRepository : "Select a repository...", [selectedRepository])
+    const { repositories, setSelectedRepositoryId, selectedRepositoryId, showAddRepo, setShowAddRepo } = useAppState();
+    const selectedRepository = useAppState(state => state.getSelectedRepository());
+    const label = useMemo(() => !!selectedRepository ? selectedRepository.repoName : "Select a repository...", [selectedRepository])
+
+
+
     const showDropdown = useMemo(() => !!Object.keys(repositories || []).length, [repositories])
     return (
         <>
@@ -36,10 +40,10 @@ const RepositoryDropdown: React.FC = () => {
                 >
                     {Object.values(repositories).map((repo) => (
                         <Dropdown.Item
-                            onClick={() => setSelectedRepository(repo.dir)}
-                            key={repo.dir}
+                            onClick={() => setSelectedRepositoryId(repo.id)}
+                            key={repo.id}
                         >
-                            {repo.dir}
+                            {repo.repoName}
                         </Dropdown.Item>
                     ))}
                     <Dropdown.Item

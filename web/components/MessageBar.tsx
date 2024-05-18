@@ -2,30 +2,27 @@ import useAnalytics from '@/hooks/useAnalytics';
 import { useAppState } from '@/hooks/useAppStore';
 import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
 import useRepository from '@/hooks/useRepository';
-import useServices from '@/hooks/useServices';
+import useBackendClient from '@/hooks/useBackendClient';
 import { generateContent } from '@/pages/api/gemini';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FiSend } from 'react-icons/fi';
 
 
 const MessageBar = () => {
-
-    const { getRepositoryData } = useRepository();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [message, setMessage] = useState("");
     const { trackEvent } = useAnalytics();
     const bottomOfChatRef = useRef<HTMLDivElement>(null);
-    const { messagesService, chatSessionsService } = useServices();
+    const { messagesService, chatSessionsService, repositoryFilesService } = useBackendClient();
     const {
-        selectedRepository,
+        selectedRepositoryId,
         userId,
         repositories,
         setShowSubscription,
         selectedChatSessionId,
         messages, } = useAppState();
 
-    const selectedChatSession = useAppState(state => state.getSelectedChatSession());
 
     const showWelcomeMessage = useMemo(() => !Object.keys(repositories || []).length, [repositories])
 
@@ -44,11 +41,8 @@ const MessageBar = () => {
 
     const sendMessage = useCallback(async (e: any) => {
         e.preventDefault();
-        if (!userId || !messagesService || !selectedChatSessionId || !chatSessionsService) {
+        if (!userId || !messagesService || !selectedChatSessionId || !chatSessionsService || !repositoryFilesService) {
             return;
-        }
-        if (!selectedChatSession?.repositoryPath) {
-            chatSessionsService.patch(selectedChatSessionId, { repositoryPath: selectedRepository })
         }
         // Don't send empty messages
         if (message.length < 1) {
@@ -62,18 +56,43 @@ const MessageBar = () => {
         setIsLoading(true);
 
         try {
-            const repositoryData = await getRepositoryData();
 
             await messagesService.create({ text: message, userId, role: "user", chatSessionId: selectedChatSessionId });
             setMessage("");
+            // const files = await repositoryFilesService.find({
+            //     paginate: false,
+            //     query: {
+            //         repositoryId: selectedRepositoryId,
+            //         $limit: -1
+            //     },
 
-            await generateContent({
-                history: messages,
-                repositoryData,
-                chatSessionId: selectedChatSessionId,
-                message,
-                userId
+            // });
+            const response = await fetch(`/api/gemini`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    history: messages,
+                    files: [],
+                    chatSessionId: selectedChatSessionId,
+                    message,
+                    userId
+                }),
             });
+
+            if (!response.ok) {
+                console.error(response);
+                setErrorMessage(response.statusText);
+            }
+
+            // await generateContent({
+            //     history: messages,
+            //     files: files.map(file => ({ fileUrl: file.googleFileUrl || "" })),
+            //     chatSessionId: selectedChatSessionId,
+            //     message,
+            //     userId
+            // });
 
             setIsLoading(false);
         } catch (error: any) {
@@ -84,7 +103,11 @@ const MessageBar = () => {
                 setShowSubscription(true)
             }
         }
-    }, [chatSessionsService, getRepositoryData, message, messages, messagesService, selectedChatSession?.repositoryPath, selectedChatSessionId, selectedRepository, setShowSubscription, trackEvent, userId])
+    }, [chatSessionsService,
+        message,
+        messages,
+        messagesService,
+        repositoryFilesService, selectedChatSessionId, selectedRepositoryId, setShowSubscription, trackEvent, userId])
 
 
     const handleKeypress = (e: any) => {
@@ -124,7 +147,7 @@ const MessageBar = () => {
                                 onKeyDown={handleKeypress}
                             ></textarea>
                             <button
-                                disabled={isLoading || message?.length === 0 || !selectedRepository}
+                                disabled={isLoading || message?.length === 0 || !selectedRepositoryId}
                                 onClick={sendMessage}
                                 className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-transparent disabled:bg-gray-500 right-1 md:right-2 disabled:opacity-40"
                             >

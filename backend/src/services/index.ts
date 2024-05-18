@@ -1,3 +1,5 @@
+import { respoitoryFiles } from './respoitory-files/respoitory-files'
+import { repositories } from './repositories/repositories'
 import { chatSession } from './chat-sessions/chat-sessions'
 import { messages } from './messages/messages'
 import { user } from './users/users'
@@ -5,6 +7,8 @@ import { user } from './users/users'
 import type { Application } from '../declarations'
 
 export const services = (app: Application) => {
+  app.configure(respoitoryFiles)
+  app.configure(repositories)
   app.configure(chatSession)
   app.configure(messages)
   app.configure(user)

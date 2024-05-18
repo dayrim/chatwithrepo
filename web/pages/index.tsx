@@ -6,7 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import useAnalytics from "@/hooks/useAnalytics";
 import Fingerprint from "@/components/FingerPrint";
 import { useAppState } from "@/hooks/useAppStore";
-import useServices from "@/hooks/useServices";
+import useBackendClient from "@/hooks/useBackendClient";
 import AddRepo from "@/components/AddRepo";
 import NoSSR from "@/shared/NoSSR";
 import SignUp from "@/components/SignUp";
@@ -21,7 +21,7 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = () => {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const { trackEvent } = useAnalytics();
-  const { authService, usersService } = useServices();
+  const { authService, usersService } = useBackendClient();
 
   const {
     setIsLoggedIn,
@@ -45,36 +45,25 @@ const Home: React.FC<HomeProps> = () => {
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
   };
-  useEffect(() => {
-    if (authService)
-      authService.reAuthenticate()
-        .then((auth) => {
-          setIsLoggedIn(true)
-          setUserInfo(auth.user)
-          setUserId(auth.user.id)
-        })
-        .catch(error => {
-          setIsLoggedIn(false)
-          setUserInfo(undefined)
-          setUserId(undefined)
-          console.error('Re-authentication failed', error)
-        });
+  const reAuthenticate = useCallback(async () => {
+    if (!!authService) {
+      try {
+        const result = await authService?.reAuthenticate();
+        setIsLoggedIn(true)
+        setUserInfo(result.user)
+        setUserId(result.user.id)
+      }
+      catch (error) {
+        setIsLoggedIn(false)
+        setUserInfo(undefined)
+        console.error('Re-authentication failed', error)
+      }
+    }
   }, [authService, setIsLoggedIn, setUserId, setUserInfo])
 
-  const fetchUserInfo = useCallback(async () => {
-    if (usersService) {
-      const { data: users } = await usersService.find({
-        query: {
-          id: userId
-        },
-      });
-      setUserInfo(users[0])
-    }
-  }, [setUserInfo, userId, usersService])
-
   useEffect(() => {
-    fetchUserInfo()
-  }, [fetchUserInfo])
+    reAuthenticate()
+  }, [reAuthenticate])
 
   useEffect(() => {
     if (!!usersService) {

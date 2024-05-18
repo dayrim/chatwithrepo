@@ -1,18 +1,22 @@
-import io from "socket.io-client";
-import socketio from "@feathersjs/socketio-client";
 import { useEffect, useMemo, useRef } from "react";
+import useAppState from "@/hooks/useAppStore";
 import { createClient } from "@/shared/BackendClient";
 import { ClientApplication } from "backend/build/client";
-import useAppState from "@/hooks/useAppStore";
 
 function useServices() {
     const clientRef = useRef<ClientApplication | undefined>(undefined);
+    const lastUserIdRef = useRef<string | undefined>(undefined); // Ref to keep track of the last userId
 
     const { userId } = useAppState();
+
     useEffect(() => {
-        if (userId)
+        // Check if userId is defined and different from the last userId
+        if (userId && userId !== lastUserIdRef.current) {
+            console.log
             clientRef.current = createClient(userId);
-    }, [userId]);
+            lastUserIdRef.current = userId; // Update the last userId ref
+        }
+    }, [userId]); // Dependency array includes only userId
 
     const usersService = useMemo(() => clientRef.current && clientRef.current.service('users'), [clientRef.current]);
     const messagesService = useMemo(() => clientRef.current && clientRef.current.service('messages'), [clientRef.current]);

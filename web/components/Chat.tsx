@@ -3,7 +3,7 @@ import { FiSend } from "react-icons/fi";
 import { BsPlusLg } from "react-icons/bs";
 import { RxHamburgerMenu } from "react-icons/rx";
 import useAnalytics from "@/hooks/useAnalytics";
-import useServices from "@/hooks/useServices";
+import useBackendClient from "@/hooks/useBackendClient";
 import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 import AddRepo from "./AddRepo";
@@ -18,10 +18,9 @@ interface ChatProps {
   toggleComponentVisibility: () => void;
 }
 const Chat: React.FC<ChatProps> = ({ toggleComponentVisibility }) => {
-  const { messagesService } = useServices();
+  const { messagesService } = useBackendClient();
   const { setMessages,
     setShowAddRepo,
-
     repositories,
     userId,
     selectedChatSessionId,
@@ -98,7 +97,7 @@ const Chat: React.FC<ChatProps> = ({ toggleComponentVisibility }) => {
                   <div className="flex flex-col items-center text-sm bg-white-800">
                     <div className="flex w-full items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">
                       <NoSSR>
-                        <>Repository: {selectedChatSession?.repositoryPath ?? ""}</>
+                        <>Repository: {selectedChatSession?.repository?.repoName ?? ""}</>
                       </NoSSR>
                     </div>
                     {messages.map((message, index) => (

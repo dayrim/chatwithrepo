@@ -32,6 +32,26 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp('updatedAt').defaultTo(knex.fn.now())
   })
 
+  await knex.schema.createTable('repositories', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
+    table.string('domain').notNullable()
+    table.string('provider').notNullable()
+    table.string('repoName').notNullable()
+    table.uuid('userId').references('id').inTable('users').onDelete('CASCADE')
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+    table.timestamp('updatedAt').defaultTo(knex.fn.now())
+  })
+
+  await knex.schema.createTable('respoitoryFiles', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
+    table.string('filePath').notNullable()
+    table.string('googleFileUrl').nullable()
+    table.string('googleFileName').nullable()
+    table.string('sha256Hash').nullable()
+    table.uuid('repositoryId').references('id').inTable('repositories').onDelete('CASCADE')
+    table.timestamp('createdAt').defaultTo(knex.fn.now())
+    table.timestamp('updatedAt').defaultTo(knex.fn.now())
+  })
   // Create chatSessions table
   await knex.schema.createTable('chatSessions', (table) => {
     // Use UUID for the primary key of the chat session
@@ -40,7 +60,7 @@ export async function up(knex: Knex): Promise<void> {
     // Assuming 'title' is a text field
     table.text('title')
 
-    table.text('repositoryPath')
+    table.uuid('repositoryId').references('id').inTable('repositories').onDelete('SET NULL')
 
     // Foreign key reference to 'users' table
     table.uuid('userId').references('id').inTable('users').onDelete('CASCADE')
@@ -67,12 +87,9 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  // Drop messages table
+  await knex.schema.dropTableIfExists('respoitoryFiles')
+  await knex.schema.dropTableIfExists('repositories')
   await knex.schema.dropTableIfExists('messages')
-
-  // Drop chatSessions table
   await knex.schema.dropTableIfExists('chatSessions')
-
-  // Drop users table
   await knex.schema.dropTableIfExists('users')
 }

@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Button, Modal, TextInput } from 'flowbite-react';
 import { useAppState } from '@/hooks/useAppStore';
-import useServices from '@/hooks/useServices';
+import useBackendClient from '@/hooks/useBackendClient';
 import { v4 as uuid } from 'uuid';
 
 // Define a schema for the user inputs using Yup
@@ -20,7 +20,7 @@ interface SignUpProps {
 const SignUp: React.FC<SignUpProps> = ({ openModal, setOpenModal }) => {
     const [submitError, setSubmitError] = useState('');
 
-    const { usersService, authService } = useServices();
+    const { usersService, authService } = useBackendClient();
     const { userId, setIsLoggedIn } = useAppState();
 
     const formik = useFormik({

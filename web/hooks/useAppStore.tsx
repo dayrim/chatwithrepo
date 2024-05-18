@@ -1,8 +1,7 @@
-import { create, } from 'zustand';
+import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
-import { v4 as uuid } from 'uuid';
-import { AppState, Repositories } from '@/types/Model';
-import { ChatSession, Messages, UserData } from 'backend/build/client';
+import { AppState } from '@/types/Model';
+import { ChatSession, Messages, UserData, Repository } from 'backend/build/client';
 
 const createAppStore = (initialState: Partial<AppState> = {}) => {
   const createState = create<AppState>()(
@@ -11,8 +10,8 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
         (set, get) => ({
           userId: undefined,
           userInfo: undefined,
-          repositories: {},
-          selectedRepository: '',
+          repositories: [],
+          selectedRepositoryId: '',
           showAddRepo: false,
           isLoggedIn: false,
           showSignUp: false,
@@ -21,61 +20,46 @@ const createAppStore = (initialState: Partial<AppState> = {}) => {
           selectedChatSessionId: undefined,
           messages: [],
           chatSessions: [],
-          setUserInfo: (userInfo: UserData | undefined) => set(() => ({ userInfo })),
-          setUserId: (test: string | undefined) => set(() => ({ userId: test })),
-          setIsLoggedIn: (isLoggedIn: boolean) => set(() => ({ isLoggedIn })),
-          setSelectedChatSessionId: (selectedChatSessionId: string) => set(() => ({ selectedChatSessionId })),
-          setRepositories: (repositories: Repositories) => set(() => ({ repositories })),
-          setSelectedRepository: (selectedRepository: string) => set(() => ({ selectedRepository })),
-          setShowAddRepo: (showAddRepo: boolean) => set(() => ({ showAddRepo })),
-          setShowSignUp: (showSignUp: boolean) => set(() => ({ showSignUp })),
-          setShowSignIn: (showSignIn: boolean) => set(() => ({ showSignIn })),
-          setShowSubscription: (showSubscription: boolean) => set(() => ({ showSubscription })),
+          setUserInfo: (userInfo: UserData | undefined) => set({ userInfo }, false, 'setUserInfo'),
+          setUserId: (userId: string | undefined) => set({ userId }, false, 'setUserId'),
+          setIsLoggedIn: (isLoggedIn: boolean) => set({ isLoggedIn }, false, 'setIsLoggedIn'),
+          setSelectedChatSessionId: (selectedChatSessionId: string) => set({ selectedChatSessionId }, false, 'setSelectedChatSessionId'),
+          pushRepository: (repository: Repository) => set((state) => ({ repositories: [...state.repositories, repository] }), false, 'pushRepository'),
 
+          setSelectedRepositoryId: (selectedRepositoryId: string) => set({ selectedRepositoryId }, false, 'selectedRepositoryId'),
+          setShowAddRepo: (showAddRepo: boolean) => set({ showAddRepo }, false, 'setShowAddRepo'),
+          setShowSignUp: (showSignUp: boolean) => set({ showSignUp }, false, 'setShowSignUp'),
+          setShowSignIn: (showSignIn: boolean) => set({ showSignIn }, false, 'setShowSignIn'),
+          setShowSubscription: (showSubscription: boolean) => set({ showSubscription }, false, 'setShowSubscription'),
           setMessages: (messages: Messages[]) => {
             const sortedMessages = messages.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
-            set(() => ({ messages: sortedMessages }));
+            set({ messages: sortedMessages }, false, 'setMessages');
           },
           setChatSessions: (chatSessions: ChatSession[]) => {
             const sortedChatSessions = chatSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            set(() => ({ chatSessions: sortedChatSessions }));
+            set({ chatSessions: sortedChatSessions }, false, 'setChatSessions');
           },
-          pushChatSession: (chatSession: ChatSession) => {
-            set((state) => ({
-              chatSessions: [...state.chatSessions, chatSession]
-            }));
-          },
-          pushMessage: (message: Messages) => {
-            set((state) => ({
-              messages: [...state.messages, message]
-            }));
-          },
-          updateMessageById: (id: string, updatedFields: Partial<Messages>) => {
-            set((state) => ({
-              messages: state.messages.map((msg) =>
-                msg.id === id ? { ...msg, ...updatedFields } : msg
-              )
-            }));
-          },
-          updateChatSessionById: (id: string, updatedFields: Partial<ChatSession>) => {
-            set((state) => ({
-              chatSessions: state.chatSessions.map((chat) =>
-                chat.id === id ? { ...chat, ...updatedFields } : chat
-              )
-            }));
-          },
+          pushChatSession: (chatSession: ChatSession) => set((state) => ({ chatSessions: [...state.chatSessions, chatSession] }), false, 'pushChatSession'),
+          pushMessage: (message: Messages) => set((state) => ({ messages: [...state.messages, message] }), false, 'pushMessage'),
+          updateMessageById: (id: string, updatedFields: Partial<Messages>) => set((state) => ({
+            messages: state.messages.map((msg) => msg.id === id ? { ...msg, ...updatedFields } : msg)
+          }), false, 'updateMessageById'),
+          updateChatSessionById: (id: string, updatedFields: Partial<ChatSession>) => set((state) => ({
+            chatSessions: state.chatSessions.map((chat) => chat.id === id ? { ...chat, ...updatedFields } : chat)
+          }), false, 'updateChatSessionById'),
           getSelectedChatSession: () => {
             const { chatSessions, selectedChatSessionId } = get();
-            const chatSession = chatSessions.find(session => session.id === selectedChatSessionId);
-            return chatSession;
+            return chatSessions.find(session => session.id === selectedChatSessionId);
+          },
+          getSelectedRepository: () => {
+            const { repositories, selectedRepositoryId } = get();
+            // Find and return the repository that matches the selectedRepository ID
+            return repositories.find(repo => repo.id === selectedRepositoryId);
           },
         }),
         {
           name: "app-store",
-          partialize: (state) => {
-            const { selectedChatSessionId, chatSessions, messages, ...persistedState } = state;
-            return persistedState;
-          },
+          partialize: (state) => ({ ...state, chatSessions: undefined, messages: undefined }),
         }
       )
     )

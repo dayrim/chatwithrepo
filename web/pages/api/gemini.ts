@@ -7,7 +7,8 @@ import {
   GoogleGenerativeAI,
 } from "@google/generative-ai";
 import { FileJson } from "@/hooks/useRepository";
-
+import { google } from "googleapis";
+import { Endpoint } from "googleapis-common";
 export const config = {
   // Disable the default body parser
   api: {
@@ -18,11 +19,13 @@ interface HistoryEntry {
   role: string;
   text: string;
 }
-
+interface GoogleFileLink {
+  fileUrl: string;
+}
 export type RequestBody = {
   history: HistoryEntry[];
+  files: GoogleFileLink[];
   message: string;
-  repositoryData: FileJson[];
   userId: string;
   chatSessionId: string;
 };
@@ -47,25 +50,12 @@ export default async function handler(
   }
 }
 export async function generateContent(body: RequestBody) {
-  // Assuming repositoryData is included in the request body
-  const { repositoryData } = body as RequestBody;
-
   const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-  const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-  console.log(`Counting tokens...`);
-  // Count tokens for the combined content of repositoryData
-  const { totalTokens } = await model.countTokens(
-    JSON.stringify(repositoryData)
-  );
-
-  console.log(`Total tokens in repositoryData: ${totalTokens}`);
-
   const {
     history,
     message: initialMessage,
     userId,
+    files,
     chatSessionId,
   } = body as RequestBody;
   const client = createClient(userId);
@@ -86,16 +76,22 @@ export async function generateContent(body: RequestBody) {
   const messageId = createdMessage.id as string;
   console.log("Created message ID:", messageId);
 
+  console.log(files, "Files length");
   const payload = {
     contents: alternatingHistory.map((entry) => ({
       role: entry.role,
-      parts: [{ text: entry.text }],
+      parts: [
+        { text: entry.text },
+        files.map(({ fileUrl }) => ({
+          file_data: { file_uri: fileUrl, mime_type: "text/plain" },
+        })),
+      ],
     })),
   };
   console.log("Payload:", JSON.stringify(payload));
 
   const response = await fetch(
-    `https://gemini.chatwithrepo.net/v1beta/models/gemini-pro:streamGenerateContent?key=${API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:streamGenerateContent?alt=sse&key=${API_KEY}`,
     {
       method: "POST",
       headers: {
@@ -121,23 +117,13 @@ export async function generateContent(body: RequestBody) {
     }
     const chunk = decoder.decode(value, { stream: true });
     console.log(`Chunk received: ${new Date().toISOString()}`);
-
-    buffer += chunk;
-
-    // Simple extraction of "text" values
     let match;
     const regex = /"text":\s*"((?:\\.|[^\"])*)"/g;
-    while ((match = regex.exec(buffer)) !== null) {
+    while ((match = regex.exec(chunk)) !== null) {
       const extractedText = match[1].replace(/\\n/g, "\n");
       console.log("Extracted text:", extractedText);
       text += extractedText;
       await client.service("messages").patch(messageId, { text });
-    }
-
-    // Remove processed part from buffer
-    const lastIndexOfText = buffer.lastIndexOf('"text":');
-    if (lastIndexOfText !== -1) {
-      buffer = buffer.substring(lastIndexOfText);
     }
   }
 }

@@ -4,6 +4,22 @@ import type { TransportConnection, Application } from '@feathersjs/feathers'
 import authenticationClient from '@feathersjs/authentication-client'
 import type { AuthenticationClientOptions } from '@feathersjs/authentication-client'
 
+import { respoitoryFilesClient } from './services/respoitory-files/respoitory-files.shared'
+export type {
+  RespoitoryFile,
+  RespoitoryFilesData,
+  RespoitoryFilesQuery,
+  RespoitoryFilesPatch
+} from './services/respoitory-files/respoitory-files.shared'
+
+import { repositoriesClient } from './services/repositories/repositories.shared'
+export type {
+  Repository,
+  RepositoriesData,
+  RepositoriesQuery,
+  RepositoriesPatch
+} from './services/repositories/repositories.shared'
+
 import { chatSessionClient } from './services/chat-sessions/chat-sessions.shared'
 export type {
   ChatSession,
@@ -52,5 +68,7 @@ export const createClient = <Configuration = any>(
   client.configure(userClient)
   client.configure(messagesClient)
   client.configure(chatSessionClient)
+  client.configure(repositoriesClient)
+  client.configure(respoitoryFilesClient)
   return client
 }

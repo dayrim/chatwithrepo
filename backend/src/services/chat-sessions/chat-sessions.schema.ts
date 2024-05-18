@@ -6,6 +6,7 @@ import type { Static } from '@feathersjs/typebox'
 import type { HookContext } from '../../declarations'
 import { dataValidator, queryValidator } from '../../validators'
 import type { ChatSessionService } from './chat-sessions.class'
+import { Repository } from '../repositories/repositories.schema'
 
 // Main data model schema
 export const chatSessionSchema = Type.Object(
@@ -16,8 +17,8 @@ export const chatSessionSchema = Type.Object(
     // String for title
     title: Type.String(),
 
-    repositoryPath: Type.String(),
-
+    // UUID string for repositoryId, as a foreign key to a repositories table
+    repositoryId: Type.String({ format: 'uuid' }),
     // UUID string for userId, assuming it's a foreign key to a users table
     userId: Type.String({ format: 'uuid' }),
 
@@ -27,14 +28,16 @@ export const chatSessionSchema = Type.Object(
   },
   { $id: 'ChatSession', additionalProperties: false }
 )
-export type ChatSession = Static<typeof chatSessionSchema>
+export type ChatSession = Static<typeof chatSessionSchema> & {
+  repository?: Repository
+}
 export const chatSessionValidator = getValidator(chatSessionSchema, dataValidator)
 export const chatSessionResolver = resolve<ChatSession, HookContext<ChatSessionService>>({})
 
 export const chatSessionExternalResolver = resolve<ChatSession, HookContext<ChatSessionService>>({})
 
 // Schema for creating new entries
-export const chatSessionDataSchema = Type.Pick(chatSessionSchema, ['userId', 'title'], {
+export const chatSessionDataSchema = Type.Pick(chatSessionSchema, ['repositoryId', 'userId', 'title'], {
   $id: 'ChatSessionData'
 })
 export type ChatSessionData = Static<typeof chatSessionDataSchema>
@@ -42,7 +45,7 @@ export const chatSessionDataValidator = getValidator(chatSessionDataSchema, data
 export const chatSessionDataResolver = resolve<ChatSession, HookContext<ChatSessionService>>({})
 
 // Schema for updating existing entries
-export const chatSessionPatchSchema = Type.Pick(chatSessionSchema, ['repositoryPath'], {
+export const chatSessionPatchSchema = Type.Pick(chatSessionSchema, ['repositoryId', 'title', 'userId'], {
   $id: 'ChatSessionPatch'
 })
 export type ChatSessionPatch = Static<typeof chatSessionPatchSchema>
