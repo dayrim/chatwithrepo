@@ -108,10 +108,12 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
             console.log('Files in repository:', filesInRepo);
             setPhase("Uploading to GenAI");
             setProgress(0);
+            let filesArray: any = []
             await Promise.all(
                 filesInRepo.map(async (filePath: string) => {
                     console.log(`Reading file: ${filePath}`);
                     let content = await fs.promises.readFile(`${dir}/${filePath}`, { encoding: 'utf8' });
+                    filesArray.push({ filePath, content });
                     if (content instanceof Uint8Array) {
                         console.log('Converting content from Uint8Array to string for file:', filePath);
                         content = new TextDecoder('utf-8').decode(content);
@@ -157,6 +159,7 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                     return { name: filePath, path: filePath, content };
                 }),
             );
+            console.log(filesArray, 'allfiles')
             await chatSessionsService.create({ title: "New Conversation", userId, repositoryId: createdRepo.id });
 
             pushRepository(createdRepo);
@@ -171,7 +174,7 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
     };
 
     const handleSubmit = () => {
-        console.log('Submit button clicked with repository link:', repoLink);
+        console.log('Submit button  clicked with repository link:', repoLink);
         fetchRepoContents(repoLink);
     };
 
