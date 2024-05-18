@@ -1,14 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import axios, { AxiosResponse } from "axios";
 import { createClient } from "@/shared/BackendClient";
-import { Readable } from "stream";
-import {
-  GenerateContentResponse,
-  GoogleGenerativeAI,
-} from "@google/generative-ai";
-import { FileJson } from "@/hooks/useRepository";
-import { google } from "googleapis";
-import { Endpoint } from "googleapis-common";
 export const config = {
   // Disable the default body parser
   api: {
