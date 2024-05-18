@@ -21,6 +21,12 @@ esbuild
           from: ['config/*'], // Matches all files in the 'config' directory
           to: ['config'] // Copies them to 'build/config'
         }
+      }),
+      copy({
+        assets: {
+          from: ['migrations/*'],
+          to: ['migrations']
+        }
       })
     ]
   })
