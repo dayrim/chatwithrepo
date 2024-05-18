@@ -42,6 +42,7 @@ exports.up = async function (knex) {
     table.string('googleFileUrl').nullable()
     table.string('googleFileName').nullable()
     table.string('sha256Hash').nullable()
+    table.timestamp('expirationTime').nullable()
     table.uuid('repositoryId').references('id').inTable('repositories').onDelete('CASCADE')
     table.timestamp('createdAt').defaultTo(knex.fn.now())
     table.timestamp('updatedAt').defaultTo(knex.fn.now())

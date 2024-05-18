@@ -141,7 +141,7 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                         try {
                             await repositoryFilesService.create({
                                 repositoryId: createdRepo.id, filePath: file.displayName, googleFileName: file.name,
-                                googleFileUrl: file.uri, sha256Hash: file.sha256Hash
+                                googleFileUrl: file.uri, sha256Hash: file.sha256Hash, expirationTime: file.expirationTime
                             });
                         } catch (err) {
                             console.error('Error creating repository file:', err);

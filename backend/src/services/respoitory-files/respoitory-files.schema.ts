@@ -16,6 +16,7 @@ export const respoitoryFilesSchema = Type.Object(
     googleFileUrl: Type.Optional(Type.String()),
     sha256Hash: Type.Optional(Type.String()),
     repositoryId: Type.String(), // Assuming UUIDs are used for ids
+    expirationTime: Type.String({ format: 'date-time' }),
     createdAt: Type.Optional(Type.String({ format: 'date-time' })), // Optional to reflect nullable, using a string with date-time format
     updatedAt: Type.Optional(Type.String({ format: 'date-time' })) // Optional to reflect nullable, using a string with date-time format
   },
@@ -35,7 +36,7 @@ export const respoitoryFilesExternalResolver = resolve<RespoitoryFile, HookConte
 // Schema for creating new entries
 export const respoitoryFilesDataSchema = Type.Pick(
   respoitoryFilesSchema,
-  ['googleFileName', 'filePath', 'sha256Hash', 'repositoryId', 'googleFileUrl'],
+  ['googleFileName', 'filePath', 'sha256Hash', 'repositoryId', 'googleFileUrl', 'expirationTime'],
   {
     $id: 'RespoitoryFilesData'
   }
@@ -58,7 +59,8 @@ export const respoitoryFilesQueryProperties = Type.Pick(respoitoryFilesSchema, [
   'filePath',
   'sha256Hash',
   'repositoryId',
-  'googleFileUrl'
+  'googleFileUrl',
+  'expirationTime'
 ])
 export const respoitoryFilesQuerySchema = Type.Intersect(
   [
