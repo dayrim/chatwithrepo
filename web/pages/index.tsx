@@ -74,12 +74,12 @@ const Home: React.FC<HomeProps> = () => {
   }, [setUserInfo, usersService])
 
   useEffect(() => {
-    if (userInfo && userInfo.maxTries === 0 && userInfo.subscriptionStatus !== "active") {
+    if (userInfo && userInfo.maxTries === 0 && !userInfo.isAdmin && userInfo.subscriptionStatus !== "active") {
       setShowSubscription(true);
     } else {
       setShowSubscription(false);
     }
-  }, [setShowSubscription, userInfo, userInfo?.maxTries, userInfo?.subscriptionStatus])
+  }, [setShowSubscription, userInfo, userInfo?.maxTries, userInfo?.isAdmin, userInfo?.subscriptionStatus])
   return (
     <>
       <Fingerprint />

@@ -17,6 +17,7 @@ export const userSchema = Type.Object(
     geminiApiKey: Type.Optional(Type.String()),
     name: Type.Optional(Type.String()),
     maxTries: Type.Integer(),
+    isAdmin: Type.Boolean(),
     stripeCustomerId: Type.Optional(Type.String()),
     subscriptionStatus: Type.Optional(
       Type.Union([
@@ -59,6 +60,7 @@ export const userDataSchema = Type.Pick(
     'githubId',
     'name',
     'maxTries',
+    'isAdmin',
     'stripeCustomerId',
     'subscriptionStatus',
     'subscriptionType',
