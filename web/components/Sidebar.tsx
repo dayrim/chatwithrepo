@@ -32,7 +32,6 @@ const Sidebar = () => {
 
   const handleCreateNewChat = useCallback(async () => {
     if (chatSessionsService && userId && selectedRepositoryId) {
-      console.log(selectedRepositoryId, 'selectedRepositoryId')
       chatSessionsService.create({ title: "New Conversation", userId, repositoryId: selectedRepositoryId });
 
     }

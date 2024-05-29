@@ -12,7 +12,7 @@ function useServices() {
     useEffect(() => {
         // Check if userId is defined and different from the last userId
         if (userId && userId !== lastUserIdRef.current) {
-            console.log
+
             clientRef.current = createClient(userId);
             lastUserIdRef.current = userId; // Update the last userId ref
         }

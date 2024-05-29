@@ -77,7 +77,6 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
             singleBranch: true,
             depth: 1,
             onProgress: event => {
-                console.log(event);
                 setPhase(event.phase);
                 if (event.total) {
                     setProgress((event.loaded / event.total) * 100);
@@ -159,7 +158,6 @@ const AddRepo: React.FC<AddRepoProps> = ({ openModal, setOpenModal }) => {
                     return { name: filePath, path: filePath, content };
                 }),
             );
-            console.log(filesArray, 'allfiles')
             await chatSessionsService.create({ title: "New Conversation", userId, repositoryId: createdRepo.id });
 
             pushRepository(createdRepo);

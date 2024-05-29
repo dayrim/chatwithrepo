@@ -57,7 +57,6 @@ const Message = (props: any) => {
   const renderSegment = (segment: any, index: any) => {
     const codeMatch = segment.match(/```(\w*)\n([\s\S]*?)\n```/);
     if (codeMatch) {
-      console.log(codeMatch, 'codeMatch')
       const [, language, code] = codeMatch;
       return <CodeBlock key={`code-${index}`} language={language} code={code} />;
     }

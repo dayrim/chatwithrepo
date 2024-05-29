@@ -57,7 +57,6 @@ export async function generateContent(body: RequestBody) {
 
   const alternatingHistory = ensureAlternatingHistory(history);
 
-  console.log("Creating an empty message");
   const createdMessage = await client.service("messages").create({
     userId,
     chatSessionId,
@@ -65,9 +64,7 @@ export async function generateContent(body: RequestBody) {
     role: "model",
   });
   const messageId = createdMessage.id as string;
-  console.log("Created message ID:", messageId);
 
-  console.log(files, "Files length");
   const payload = {
     contents: alternatingHistory.map((entry, index) => {
       const result = {

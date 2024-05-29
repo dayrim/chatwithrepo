@@ -2,6 +2,12 @@
 import { app } from './src'
 
 // Load our database connection info from the app configuration
-const config = app.get('postgresql')
+const config = {
+  ...app.get('postgresql'),
+  migrations: {
+    directory: 'migrations',
+    extension: 'js'
+  }
+}
 
 module.exports = config
