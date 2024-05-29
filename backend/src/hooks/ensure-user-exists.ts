@@ -17,7 +17,7 @@ export const ensureUserExists = async (context: HookContext) => {
 
     if (existingUser.length === 0) {
       logger.info('Creating new user ...')
-      await usersService.create({ id: data.userId, maxTries: 3 })
+      await usersService.create({ id: data.userId, maxTries: 3, isAdmin: false })
       logger.info('User created !')
     }
   }
