@@ -6,6 +6,9 @@ Chat with your repositories with the power of Gemini!
 
 Chatwithrepo is a platform that allows users to chat with their repositories. It uses Gemini to provide intelligent responses.
 
+## Live 
+
+[Live deployment](https://chatwithrepo.net/)
 ## Deploy 🛠️
 
 You will need to have Docker and Docker Compose installed on your server.
